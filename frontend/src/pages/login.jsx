@@ -1,7 +1,7 @@
 import BrandHeader from "../components/BrandHeader";
 import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
 import { useState } from "react";
+import { login } from "../services/api/auth";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -12,19 +12,14 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post("http://localhost:3001/login", {
-        email,
-        password,
-      });
-      if (response.data.success) {
+      const response = await login({ email, password });
+      if (response.success) {
         navigate("/user"); // Navigate to user dashboard on success
       } else {
-        setErrorMessage(response.data.message || "Login failed. Please try again.");
+        setErrorMessage(response.message || "Login failed. Please try again.");
       }
     } catch (error) {
-      setErrorMessage(
-        error.response?.data?.message || "An error occurred. Please try again."
-      );
+      setErrorMessage(error.message || "An error occurred. Please try again.");
     }
   };
 

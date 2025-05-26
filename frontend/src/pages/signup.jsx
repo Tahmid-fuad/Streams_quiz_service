@@ -1,10 +1,10 @@
 import BrandHeader from "../components/BrandHeader";
 import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
 import { useState } from "react";
+import { signup } from "../services/api/auth";
 
 export default function Signup() {
-  const [fullName, setFullName] = useState("");
+  const [name, setName] = useState(""); // Changed from fullName
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
@@ -13,21 +13,14 @@ export default function Signup() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post("http://localhost:3001/signup", {
-        fullName,
-        email,
-        password,
-        role: "student", 
-      });
-      if (response.data.success) {
-        navigate("/login"); 
+      const response = await signup({ name, email, password });
+      if (response.message === "User registered successfully") {
+        navigate("/login");
       } else {
-        setErrorMessage(response.data.message || "Signup failed. Please try again.");
+        setErrorMessage(response.message || "Signup failed. Please try again.");
       }
     } catch (error) {
-      setErrorMessage(
-        error.response?.data?.message || "An error occurred. Please try again."
-      );
+      setErrorMessage(error.message || "An error occurred. Please try again.");
     }
   };
 
@@ -46,8 +39,8 @@ export default function Signup() {
             <input
               type="text"
               className="w-full mt-1 px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
               required
             />
           </div>
