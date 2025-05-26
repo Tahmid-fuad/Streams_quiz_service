@@ -1,22 +1,35 @@
-const express = require('express');
-const app = express();
-const port = process.env.PORT || 3002; // Using 3002 to avoid conflict with other services
+const express = require("express");
+const dotenv = require("dotenv");
+dotenv.config();
 
-// Middleware for parsing JSON and urlencoded form data
+const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Simple health check route
-app.get('/health', (req, res) => {
-  res.status(200).json({ status: 'ok', service: 'submission-service' });
+// DB and Start
+const connectDB = require("./db");
+connectDB();
+
+const submissionRoutes = require("./routes");
+app.use("/api/submissions", submissionRoutes);
+
+// Root and health check
+app.get("/", (req, res) => {
+  res.send("Submission Service is running");
 });
 
-// Root route
-app.get('/', (req, res) => {
-  res.send('Submission Service is running');
+
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "ok", service: "submission-service" });
 });
 
-// Start the server
-app.listen(port, () => {
-  console.log(`Submission service listening on port ${port}`);
+// 404
+app.use((req, res) => {
+  res.status(404).json({ message: "404 | Route not found" });
+});
+
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`📦 Submission Service running at http://localhost:${PORT}`);
 });
