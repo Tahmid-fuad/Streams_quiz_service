@@ -1,5 +1,5 @@
 // pages/Login.jsx
-import BrandHeader from "../components/BrandHeader";
+import BrandHeader from "./BrandHeader";
 
 export default function Login() {
   return (
