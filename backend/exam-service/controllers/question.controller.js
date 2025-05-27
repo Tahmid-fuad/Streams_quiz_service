@@ -3,12 +3,17 @@ import Question from "../models/question.model.js";
 // Get all Questions
 const getAllQuestions = async (req, res) => {
   try {
-    const { examId } = req.query || req.body || req.params;
+    const { examId } = req.params;
+
     if (!examId) {
       return res.status(400).json({ message: "Exam ID is required" });
     }
-    // serve the questions for the exam
-    const questions = await Question.find({ examId }).populate("examId");
+    // Fetch the questions for the given examId
+    const questions = await Question.find({ examId: examId });
+    if (!questions || questions.length === 0) {
+      return res.status(404).json({ message: "Questions not found" });
+    }
+
     res.status(200).json(questions);
   } catch (error) {
     res
@@ -35,12 +40,19 @@ const getQuestionById = async (req, res) => {
 
 // Create a new Question
 const createQuestion = async (req, res) => {
-  const { question_text, options, correctOption, examId } = req.body;
+  const { question_text, options, correctOption, score } = req.body;
+  const { examId } = req.params;
+
+  if (!examId) {
+    return res.status(400).json({ message: "Exam ID is required" });
+  }
+
   try {
     const newQuestion = new Question({
       question_text,
       options,
       correctOption,
+      score,
       examId,
     });
     await newQuestion.save();

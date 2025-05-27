@@ -10,13 +10,18 @@ const questionSchema = new mongoose.Schema({
     required: true,
   },
   correctOption: {
-    type: Number,
+    type: String,
     required: true,
   },
-  total_score: {
+  score: {
     type: Number,
     required: true,
     default: 1,
+  },
+  examId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Exam",
+    required: true,
   },
 });
 

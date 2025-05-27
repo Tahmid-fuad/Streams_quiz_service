@@ -12,7 +12,7 @@ const examSchema = new mongoose.Schema(
         required: true,
       },
     ],
-    score: {
+    total_score: {
       type: Number,
       required: true,
       default: 0,

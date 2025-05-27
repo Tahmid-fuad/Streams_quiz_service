@@ -8,6 +8,7 @@ router.post("/", examController.createExam);
 router.put("/:id", examController.updateExam);
 router.delete("/:id", examController.deleteExam);
 
+// => Question routes
 import questionRoutes from "./question.route.js";
 router.use("/:examId/questions", questionRoutes);
 

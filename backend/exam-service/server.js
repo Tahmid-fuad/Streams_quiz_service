@@ -24,10 +24,6 @@ app.use(express.urlencoded({ extended: true }));
 // import authRoutes from "./routes/auth.route.js";
 // app.use("/api/auth", authRoutes);
 
-// => Question routes
-import questionRoutes from "./routes/question.route.js";
-app.use("/api/questions", questionRoutes);
-
 // Import exam routes
 import examRoutes from "./routes/exam.route.js";
 app.use("/api/exams", examRoutes);
