@@ -68,8 +68,8 @@ const loginUser = async (req, res) => {
     // Generate JWT token
 const token = jwt.sign(
   { email: user.email, role: user.role },
-  process.env.JWT_SECRET || "yoursecretkey",
-  { expiresIn: "1h" }
+  process.env.JWT_SECRET,
+  { expiresIn: "7d" }
 );
 
 
@@ -99,7 +99,7 @@ const getUserProfile = async (req, res) => {
 
   try {
     // Verify token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || "yoursecretkey");
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     // Extract email from token
     const userEmail = decoded.email;
