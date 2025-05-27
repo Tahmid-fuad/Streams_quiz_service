@@ -11,7 +11,7 @@ export default function AdminNavbar() {
         <Link to="/admin/dashboard" className="hover:text-indigo-600">Dashboard</Link>
         <Link to="/admin/exams" className="hover:text-indigo-600">Exams</Link>
         <Link to="/admin/users" className="hover:text-indigo-600">Users</Link>
-        <Link to="/admin/profile" className="hover:text-indigo-600">Profile</Link>
+        <Link to="/admin" className="hover:text-indigo-600">Profile</Link>
       </div>
     </nav>
   );

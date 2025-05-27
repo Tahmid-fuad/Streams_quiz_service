@@ -23,11 +23,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
-          <Route path="/admin/exams" element={<AdminExams />} />
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
-          <Route path="/admin/examquestions" element={<AdminExamQuestions />} />
-          <Route path="/admin/users" element={<AdminUsers />} />
-        <Route path="/admin/profile" element={<AdminProfile />} />
+        
           <Route element={<ProtectedRoute allowedRole="student" />}>
             <Route path="/user" element={<UserDashboard />} />
             <Route path="/profile" element={<Profile />} />
@@ -35,7 +31,11 @@ function App() {
             <Route path="/exams" element={<Exams />} />
           </Route>
           <Route element={<ProtectedRoute allowedRole="admin" />}>
-            <Route path="/admin" element={<Admin />} />
+            <Route path="/admin" element={<AdminProfile />} />
+            <Route path="/admin/exams" element={<AdminExams />} />
+            <Route path="/admin/dashboard" element={<AdminDashboard />} />
+            <Route path="/admin/examquestions" element={<AdminExamQuestions />} />
+            <Route path="/admin/users" element={<AdminUsers />} />
           </Route>
         </Routes>
       </BrowserRouter>
