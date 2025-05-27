@@ -1,16 +1,31 @@
-const express = require("express");
+import express from "express";
 const app = express();
 
 // Load environment variables
-const dotenv = require("dotenv");
+import dotenv from "dotenv";
 dotenv.config();
+
+// Middleware for CORS Handling
+import cors from "cors";
+app.use(
+  cors({
+    origin: process.env.CORS_ORIGIN, // Adjust the origin as needed
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true,
+  })
+);
 
 // Middleware for parsing JSON and urlencoded form data
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Import routes
-const examRoutes = require("./routes");
+// => Authentication routes
+// import authRoutes from "./routes/auth.route.js";
+// app.use("/api/auth", authRoutes);
+
+// Import exam routes
+import examRoutes from "./routes/exam.route.js";
 app.use("/api/exams", examRoutes);
 
 // Root route
@@ -29,7 +44,7 @@ app.use((req, res) => {
 });
 
 // Connect to the database
-const connectDB = require("./db");
+import connectDB from "./config/db.js";
 connectDB();
 
 // Start the server

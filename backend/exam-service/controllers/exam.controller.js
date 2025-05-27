@@ -1,4 +1,4 @@
-const Exam = require("./models/exam.model");
+import Exam from "../models/exam.model.js";
 
 // Get all Exams
 const getAllExams = async (req, res) => {
@@ -88,7 +88,7 @@ const deleteExam = (req, res) => {
     });
 };
 
-module.exports = {
+export default {
   getAllExams,
   getExamById,
   createExam,
