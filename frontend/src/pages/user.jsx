@@ -1,3 +1,7 @@
+import { useContext, useState } from 'react';
+import { AuthContext } from '../context/AuthContext';
+import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
 import {
   BarChart,
   Bar,
@@ -13,7 +17,6 @@ import {
   Area,
   Legend
 } from 'recharts';
-import Footer from '../components/footer';
 
 const examResults = [
   { name: 'Math', score: 85 },
@@ -47,20 +50,13 @@ const upcomingExams = [
 const pieColors = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#3b82f6'];
 
 export default function UserDashboard() {
+  const { user } = useContext(AuthContext);
+  const [currentPage, setCurrentPage] = useState('Dashboard');
+
   return (
     <div className="min-h-screen bg-gray-100 text-gray-800">
       {/* Navbar */}
-      <nav className="bg-white shadow-md py-4 px-6 flex justify-between items-center">
-        <div className="flex items-center space-x-3">
-          <img src="/STL-Logo-250.png" alt="Logo" className="h-10 w-100" />
-          <span className="text-xl font-bold">EduStream</span>
-        </div>
-        <div className="space-x-6 hidden md:flex">
-          <a href="#" className="text-gray-700 hover:text-indigo-600">Dashboard</a>
-          <a href="#" className="text-gray-700 hover:text-indigo-600">Exams</a>
-          <a href="#" className="text-gray-700 hover:text-indigo-600">Profile</a>
-        </div>
-      </nav>
+      <Navbar currentPage={currentPage} setCurrentPage={setCurrentPage} />
 
       {/* Profile Section */}
       <section className="container mx-auto p-6 bg-white mt-6 rounded-lg shadow">
@@ -71,11 +67,12 @@ export default function UserDashboard() {
             className="w-32 h-32 rounded-full object-cover border-2 border-indigo-500"
           />
           <div>
-            <h2 className="text-2xl font-semibold">John Doe</h2>
-            <p className="text-gray-600">Email: johndoe@example.com</p>
-            <p className="text-gray-600">Student ID: 123456</p>
-            <p className="text-gray-600">Grade: 10</p>
-            <p className="text-gray-600">Section: A</p>
+            <h2 className="text-2xl font-semibold">{user?.name || 'Guest'}</h2>
+            <p className="text-gray-600">Email: {user?.email || 'N/A'}</p>
+            {/* Add Student ID, Grade, Section if available in backend */}
+            {/* <p className="text-gray-600">Student ID: 123456</p> */}
+            {/* <p className="text-gray-600">Grade: 10</p> */}
+            {/* <p className="text-gray-600">Section: A</p> */}
           </div>
         </div>
       </section>
@@ -186,7 +183,7 @@ export default function UserDashboard() {
           })}
         </div>
       </section>
-      <Footer/>
+      <Footer />
     </div>
   );
 }

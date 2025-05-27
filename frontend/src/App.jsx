@@ -6,20 +6,30 @@ import Signup from './pages/signup';
 import Profile from './pages/profile';
 import Dashboard from './pages/dashboard';
 import Exams from './pages/exams';
+import Admin from './pages/Admin';
+import { AuthProvider } from './context/AuthContext';
+import ProtectedRoute from './components/protectedRoute';
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Login/>} />
-        <Route path="/user" element={<UserDashboard/>} />
-        <Route path="/login" element={<Login/>} />
-        <Route path="/signup" element={<Signup/>} />
-        <Route path="/profile" element={<Profile/>} />
-        <Route path="/dashboard" element={<Dashboard/>} />
-        <Route path="/exams" element={<Exams/>} />
-      </Routes>
-    </BrowserRouter>
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route element={<ProtectedRoute allowedRole="student" />}>
+            <Route path="/user" element={<UserDashboard />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/exams" element={<Exams />} />
+          </Route>
+          <Route element={<ProtectedRoute allowedRole="admin" />}>
+            <Route path="/admin" element={<Admin />} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
   );
 }
 
