@@ -8,7 +8,7 @@ import Dashboard from "./pages/dashboard";
 import Exams from "./pages/exams";
 import Admin from "./pages/Admin";
 import { AuthProvider } from "./context/AuthContext";
-import ProtectedRoute from "./components/protectedRoute";
+import ProtectedRoute from "./components/ProtectedRoute";
 import AdminExams from "./pages/AdminExams";
 import AdminUsers from "./pages/AdminUsers";
 import AdminProfile from "./pages/AdminProfile";
