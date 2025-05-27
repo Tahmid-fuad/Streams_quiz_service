@@ -1,42 +1,56 @@
-// context/AuthContext.jsx
-import { createContext, useState, useEffect } from 'react';
-import { checkToken } from '../services/api/auth';
+import { createContext, useState, useEffect } from "react";
+import { getRole } from "../services/api/auth";
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
-  useEffect(() => {
-    // Check token on app load
-    const initializeAuth = async () => {
-      const userData = await checkToken();
-      if (userData) {
-        setUser(userData);
+  const checkToken = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setUser(null);
+      setLoading(false);
+      return false;
+    }
+
+    try {
+      const response = await getRole();
+      if (response.role && response.email) {
+        setUser({ email: response.email, role: response.role });
+        return true;
+      } else {
+        logout();
+        return false;
       }
-    };
-    initializeAuth();
-
-    // Periodic token check
-    const interval = setInterval(async () => {
-      const userData = await checkToken();
-      if (!userData) {
-        setUser(null);
-        localStorage.removeItem('token');
-      }
-    }, 5 * 60 * 1000);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  // Logout function
-  const logout = () => {
-    localStorage.removeItem('token');
-    setUser(null);
+    } catch (error) {
+      logout();
+      return false;
+    } finally {
+      setLoading(false);
+    }
   };
 
+  const logout = () => {
+  return new Promise((resolve) => {
+    setIsLoggingOut(true);
+    localStorage.removeItem("token");
+    setUser(null);
+    setTimeout(() => {
+      setIsLoggingOut(false);
+      resolve(); // Only resolve after setting flag
+    }, 100); // Give a slight delay to ensure ProtectedRoute sees isLoggingOut = true
+  });
+};
+
+  useEffect(() => {
+    checkToken();
+  }, []);
+
   return (
-    <AuthContext.Provider value={{ user, setUser, checkToken, logout }}>
+    <AuthContext.Provider value={{ user, setUser, checkToken, logout, loading, isLoggingOut }}>
       {children}
     </AuthContext.Provider>
   );

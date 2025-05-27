@@ -9,7 +9,7 @@ export default function AdminExamSetup() {
     fullMarks: "",
     duration: "",
   });
-
+  const [successMessage, setSuccessMessage] = useState(""); // New state for success message
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -21,10 +21,12 @@ export default function AdminExamSetup() {
 
     // Save exam setup info in localStorage
     localStorage.setItem("currentExam", JSON.stringify(exam));
-    alert("Exam setup saved!");
+    setSuccessMessage("Exam setup saved! Redirecting to add questions...");
 
-    // Redirect to questions page
-    navigate("/admin/examcquestions");
+    // Redirect to questions page after 2 seconds
+    setTimeout(() => {
+      navigate("/admin/examquestions");
+    }, 2500);
   };
 
   return (
@@ -35,6 +37,9 @@ export default function AdminExamSetup() {
           <h2 className="text-2xl font-bold mb-6 text-indigo-700 border-b pb-2">
             🗂️ Create New Exam
           </h2>
+          {successMessage && (
+            <p className="text-green-500 text-sm text-center mb-4">{successMessage}</p>
+          )}
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <label className="block font-medium mb-1">Subject Name</label>

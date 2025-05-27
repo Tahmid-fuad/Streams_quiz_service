@@ -22,8 +22,8 @@ export default function Navbar({ currentPage, setCurrentPage }) {
     { name: 'Profile', path: '/admin' },
   ];
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     setIsMobileMenuOpen(false);
     navigate('/login');
   };
@@ -60,11 +60,10 @@ export default function Navbar({ currentPage, setCurrentPage }) {
 
       {/* Navigation Links and User Info */}
       <div
-        className={`flex items-center space-x-6 md:flex ${
-          isMobileMenuOpen ? 'flex flex-col absolute top-16 left-0 w-full bg-white shadow-md p-4' : 'hidden md:flex'
-        }`}
+        className={`flex items-center space-x-6 md:flex ${isMobileMenuOpen ? 'flex flex-col absolute top-16 left-0 w-full bg-white shadow-md p-4' : 'hidden md:flex'
+          }`}
       >
-        {user && (
+        {user ? (
           <>
             <span className="text-black">Welcome, {user.name}</span>
             <div className="flex items-center space-x-6">
@@ -78,9 +77,8 @@ export default function Navbar({ currentPage, setCurrentPage }) {
                     }
                     setIsMobileMenuOpen(false);
                   }}
-                  className={`${
-                    isActive(link) ? 'text-blue-600 font-semibold' : 'text-black hover:text-blue-600'
-                  } transition`}
+                  className={`${isActive(link) ? 'text-blue-600 font-semibold' : 'text-black hover:text-blue-600'
+                    } transition`}
                 >
                   {link.name}
                 </Link>
@@ -93,6 +91,16 @@ export default function Navbar({ currentPage, setCurrentPage }) {
               </button>
             </div>
           </>
+        ) : (
+          <div className="flex items-center space-x-6">
+            <Link
+              to="/login"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="bg-indigo-700 text-white px-4 py-1 rounded-full hover:bg-indigo-800 transition"
+            >
+              Login
+            </Link>
+          </div>
         )}
         {!user && <span className="text-black"></span>}
       </div>

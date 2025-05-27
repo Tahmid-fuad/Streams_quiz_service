@@ -7,34 +7,60 @@ export default function Signup() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
-  const [successMessage, setSuccessMessage] = useState(""); 
+  const [successMessage, setSuccessMessage] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
   const navigate = useNavigate();
+
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const validatePassword = (password) => {
+    return password.length >= 8;
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setErrorMessage("");
+    setEmailError("");
+    setPasswordError("");
+    setSuccessMessage("");
+
+    if (!name.trim()) {
+      setErrorMessage("Full name is required.");
+      return;
+    }
+
+    if (!validateEmail(email)) {
+      setEmailError("Please enter a valid email address.");
+      return;
+    }
+
+    if (!validatePassword(password)) {
+      setPasswordError("Password must be at least 8 characters long.");
+      return;
+    }
+
     try {
       const response = await signup({ name, email, password });
       if (response.message === "User registered successfully") {
         setSuccessMessage("Signup successful! Redirecting to login...");
-        setErrorMessage(""); 
-        // Redirect to login after 2 seconds
         setTimeout(() => {
           navigate("/login");
         }, 2000);
       } else {
         setErrorMessage(response.message || "Signup failed. Please try again.");
-        setSuccessMessage(""); // Clear success message
       }
     } catch (error) {
       setErrorMessage(error.message || "An error occurred. Please try again.");
-      setSuccessMessage(""); // Clear success message
     }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
-        {/* Hardcoded Logo and EduStream Name */}
         <div className="flex items-center justify-center space-x-3 mb-6">
           <img src="/STL-Logo-250.png" alt="Logo" className="h-10 w-auto" />
           <h1 className="text-2xl font-bold text-indigo-700">EduStream</h1>
@@ -72,6 +98,7 @@ export default function Signup() {
               onChange={(e) => setEmail(e.target.value)}
               required
             />
+            {emailError && <p className="text-red-500 text-sm">{emailError}</p>}
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700">
@@ -84,6 +111,7 @@ export default function Signup() {
               onChange={(e) => setPassword(e.target.value)}
               required
             />
+            {passwordError && <p className="text-red-500 text-sm">{passwordError}</p>}
           </div>
           <button
             type="submit"

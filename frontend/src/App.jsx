@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Home from "./pages/home";
 import Login from "./pages/login";
 import Signup from "./pages/signup";
@@ -12,6 +12,7 @@ import AdminUsers from "./pages/AdminUsers";
 import AdminProfile from "./pages/AdminProfile";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminExamQuestions from "./pages/AdminExamQuestion";
+import AccessDenied from "./pages/AccessDenied";
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
+          <Route path="/access-denied" element={<AccessDenied />} />
 
           <Route element={<ProtectedRoute allowedRole="student" />}>
             <Route path="/profile" element={<Profile />} />
@@ -35,7 +37,8 @@ function App() {
             <Route path="/admin/examquestions" element={<AdminExamQuestions />} />
             <Route path="/admin/users" element={<AdminUsers />} />
           </Route>
-          <Route path="*" element={<Navigate to="/" replace />} />
+
+          <Route path="*" element={<AccessDenied />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>
