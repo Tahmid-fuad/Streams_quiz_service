@@ -26,7 +26,7 @@ export default function Login() {
 
         // Redirect based on role
         if (response.role === "student") {
-          navigate("/user");
+          navigate("/profile");
         } else if (response.role === "admin") {
           navigate("/admin");
         } else {
