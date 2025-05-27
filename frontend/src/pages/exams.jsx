@@ -1,5 +1,5 @@
 import { useState } from "react";
-import Navbar from "../components/Navbar";
+import Navbar from "../components/NavBar";
 import Footer from "../components/Footer";
 
 const upcomingExams = [
@@ -29,7 +29,7 @@ const completedExams = [
   { id: 18, subject: "Music", date: "2025-05-23", time: "9:30 AM - 11:00 AM", duration: "1.5 hours", score: 92 },
 ];
 
-export default function Exams() {
+export default function Exams({ currentPage, setCurrentPage }) {
   const [view, setView] = useState("upcoming");
 
   const sectionTitleStyle = "text-2xl font-bold mb-6 text-indigo-800 flex items-center gap-2";
@@ -38,18 +38,7 @@ export default function Exams() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-white text-gray-800 flex flex-col">
-      {/* <Navbar /> */}
- <nav className="bg-white shadow-md py-4 px-6 flex justify-between items-center">
-   <div className="flex items-center space-x-3">
-     <img src="/STL-Logo-250.png" alt="Logo" className="h-10 w-auto" />
-     <span className="text-xl font-bold text-indigo-700">EduStream</span>
-   </div>
-   <div className="space-x-6 hidden md:flex">
-     <a href="/dashboard" className="text-gray-700 hover:text-indigo-600">Dashboard</a>
-     <a href="/exams" className="text-gray-700 hover:text-indigo-600">Exams</a>
-     <a href="/profile" className="text-indigo-600 font-semibold">Profile</a>
-   </div>
- </nav>
+      <Navbar currentPage={currentPage} setCurrentPage={setCurrentPage} />
       <main className="container mx-auto px-4 py-8 flex-grow">
         {/* Toggle Buttons */}
         <div className="flex justify-center gap-4 mb-10">
@@ -57,11 +46,10 @@ export default function Exams() {
             <button
               key={type}
               onClick={() => setView(type)}
-              className={`px-5 py-2 rounded-full font-medium transition-all duration-300 ${
-                view === type
-                  ? "bg-indigo-600 text-white shadow"
-                  : "bg-white border border-gray-300 text-gray-700 hover:bg-indigo-100"
-              }`}
+              className={`px-5 py-2 rounded-full font-medium transition-all duration-300 ${view === type
+                ? "bg-indigo-600 text-white shadow"
+                : "bg-white border border-gray-300 text-gray-700 hover:bg-indigo-100"
+                }`}
             >
               {type.charAt(0).toUpperCase() + type.slice(1)}
             </button>
@@ -128,26 +116,24 @@ export default function Exams() {
                     <p className="flex items-center gap-2">
                       <strong>🏁 Score:</strong>
                       <span
-                        className={`inline-block text-sm font-bold px-3 py-1 rounded-full ${
-                          exam.score >= 90
-                            ? "bg-green-100 text-green-800"
-                            : exam.score >= 70
+                        className={`inline-block text-sm font-bold px-3 py-1 rounded-full ${exam.score >= 90
+                          ? "bg-green-100 text-green-800"
+                          : exam.score >= 70
                             ? "bg-yellow-100 text-yellow-800"
                             : "bg-red-100 text-red-800"
-                        }`}
+                          }`}
                       >
                         {exam.score}%
                       </span>
                     </p>
                     <div className="w-full bg-gray-200 rounded-full h-2.5 mt-2">
                       <div
-                        className={`h-2.5 rounded-full ${
-                          exam.score >= 90
-                            ? "bg-green-500"
-                            : exam.score >= 70
+                        className={`h-2.5 rounded-full ${exam.score >= 90
+                          ? "bg-green-500"
+                          : exam.score >= 70
                             ? "bg-yellow-500"
                             : "bg-red-500"
-                        }`}
+                          }`}
                         style={{ width: `${exam.score}%` }}
                       ></div>
                     </div>

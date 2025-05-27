@@ -1,6 +1,6 @@
 import React, { useContext, useState } from "react";
 import { AuthContext } from "../context/AuthContext";
-import Navbar from "../components/Navbar";
+import Navbar from "../components/NavBar";
 import Footer from "../components/Footer";
 
 export default function Profile() {
@@ -121,15 +121,6 @@ export default function Profile() {
                 <p><strong>Section:</strong> {profile.section}</p>
               </div>
             )}
-
-            <button
-              onClick={() => {
-                if (confirm("Are you sure you want to logout?")) logout();
-              }}
-              className="mt-6 bg-red-500 hover:bg-red-600 text-white font-medium px-5 py-2 rounded-lg"
-            >
-              Logout
-            </button>
           </div>
         </div>
       </main>

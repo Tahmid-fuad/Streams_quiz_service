@@ -1,4 +1,5 @@
-import AdminNavbar from "../components/AdminNavbar";
+import Footer from "../components/Footer";
+import Navbar from "../components/NavBar";
 
 const students = [
   {
@@ -78,7 +79,7 @@ const students = [
 export default function AdminUsers() {
   return (
     <div className="min-h-screen bg-gradient-to-tr from-pink-50 to-yellow-50">
-      <AdminNavbar />
+      <Navbar />
       <div className="container mx-auto p-6">
         <h2 className="text-3xl font-bold text-center text-purple-700 mb-8">👨‍🎓 Student Details</h2>
 
@@ -102,13 +103,12 @@ export default function AdminUsers() {
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-2">
                   <div
-                    className={`h-2 rounded-full ${
-                      student.avgMarks >= 80
+                    className={`h-2 rounded-full ${student.avgMarks >= 80
                         ? "bg-green-400"
                         : student.avgMarks >= 60
-                        ? "bg-yellow-400"
-                        : "bg-red-400"
-                    }`}
+                          ? "bg-yellow-400"
+                          : "bg-red-400"
+                      }`}
                     style={{ width: `${student.avgMarks}%` }}
                   />
                 </div>
@@ -117,6 +117,7 @@ export default function AdminUsers() {
           ))}
         </div>
       </div>
+      <Footer />
     </div>
   );
 }

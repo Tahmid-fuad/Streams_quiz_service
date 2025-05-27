@@ -1,6 +1,7 @@
 import { useState } from "react";
-import AdminNavbar from "../components/AdminNavbar";
 import { useNavigate } from "react-router-dom";
+import Navbar from "../components/NavBar";
+import Footer from "../components/Footer";
 
 export default function AdminExamSetup() {
   const [exam, setExam] = useState({
@@ -28,7 +29,7 @@ export default function AdminExamSetup() {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <AdminNavbar />
+      <Navbar />
       <div className="container mx-auto p-6 max-w-xl">
         <div className="bg-white p-8 rounded-lg shadow">
           <h2 className="text-2xl font-bold mb-6 text-indigo-700 border-b pb-2">
@@ -77,6 +78,7 @@ export default function AdminExamSetup() {
           </form>
         </div>
       </div>
+      <Footer />
     </div>
   );
 }

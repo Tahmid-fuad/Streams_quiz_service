@@ -4,7 +4,8 @@ import {
   RadarChart, Radar, PolarGrid, PolarAngleAxis,
   ScatterChart, Scatter, ZAxis
 } from "recharts";
-import AdminNavbar from "../components/AdminNavbar";
+import Navbar from "../components/NavBar";
+import Footer from "../components/Footer";
 
 const streamData = [
   { stream: "Science", students: 120 },
@@ -52,7 +53,7 @@ const RADAR_COLORS = ["#F97316", "#6366F1", "#EAB308", "#EC4899"];
 export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-gradient-to-tr from-indigo-50 to-pink-50">
-      <AdminNavbar />
+      <Navbar />
       <div className="container mx-auto p-6">
         <h2 className="text-3xl font-bold text-center text-indigo-700 mb-10">📊 Admin Dashboard</h2>
 
@@ -157,6 +158,7 @@ export default function AdminDashboard() {
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 }

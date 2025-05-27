@@ -1,5 +1,6 @@
 import { useState } from "react";
-import AdminNavbar from "../components/AdminNavbar";
+import Navbar from "../components/NavBar";
+import Footer from "../components/Footer";
 
 export default function AdminProfile() {
   const [adminInfo, setAdminInfo] = useState({
@@ -38,7 +39,7 @@ export default function AdminProfile() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
-      <AdminNavbar />
+      <Navbar />
 
       <div className="container mx-auto p-6">
         <h2 className="text-4xl font-extrabold text-blue-800 mb-8 text-center tracking-wide">
@@ -189,6 +190,7 @@ export default function AdminProfile() {
           )}
         </div>
       </div>
+      <Footer />
     </div>
   );
 }

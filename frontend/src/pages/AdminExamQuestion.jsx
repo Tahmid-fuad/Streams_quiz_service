@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import AdminNavbar from "../components/AdminNavbar";
+import Navbar from "../components/NavBar";
+import Footer from "../components/Footer";
 
 export default function AdminExamQuestions() {
   const [mcq, setMcq] = useState({
@@ -35,7 +36,7 @@ export default function AdminExamQuestions() {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <AdminNavbar />
+      <Navbar />
       <div className="container mx-auto p-6 max-w-2xl">
         <div className="bg-white p-8 rounded-lg shadow">
           <h2 className="text-2xl font-bold mb-6 text-indigo-700 border-b pb-2">
@@ -97,6 +98,7 @@ export default function AdminExamQuestions() {
           </form>
         </div>
       </div>
+      <Footer />
     </div>
   );
 }
