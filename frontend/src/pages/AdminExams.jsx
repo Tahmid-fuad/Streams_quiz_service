@@ -23,7 +23,7 @@ export default function AdminExamSetup() {
     alert("Exam setup saved!");
 
     // Redirect to questions page
-    navigate("/admin/examcquestions");
+    navigate("/admin/examquestions");
   };
 
   return (
