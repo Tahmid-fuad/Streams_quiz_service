@@ -1,5 +1,4 @@
 export const API_ENDPOINTS = {
-  // Auth endpoints
   LOGIN: "/login",
   SIGNUP: "/register",
   PROFILE: "/profile",
@@ -11,5 +10,6 @@ export const API_ENDPOINTS = {
 
   CREATE_EXAM: "/admin/exams",
   ADD_QUESTIONS: (examId) => `/admin/exams/${examId}/questions/bulk`,
-  GET_EXAM: (examId) => `/exams/${examId}`,
+  GET_EXAM: (examId) => `/admin/exams/${examId}`,
+  GET_ALL_EXAMS: "/admin/exams",
 };
