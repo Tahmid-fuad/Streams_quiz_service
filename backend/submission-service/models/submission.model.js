@@ -1,19 +1,33 @@
 const mongoose = require("mongoose");
 
 const answerSchema = new mongoose.Schema({
-  question_id: String,
+  question_id: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Question",
+    required: true,
+  },
   selected_option: String,
   correct_option: String,
 });
 
 const submissionSchema = new mongoose.Schema(
   {
-    user_id: String,
-    exam_id: String,
+    user_id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    exam_id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Exam",
+      required: true,
+    },
     answers: [answerSchema],
     totalScore: Number,
-    started_at: Date,
-    submitted_at: Date,
+    submitted_at: {
+      type: Date,
+      default: Date.now,
+    },
   },
   {
     timestamps: true,

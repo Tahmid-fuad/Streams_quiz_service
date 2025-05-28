@@ -3,22 +3,31 @@ const axios = require("axios");
 
 // POST /api/submissions
 const submitExam = async (req, res) => {
-  try {
-    const { user_id, exam_id, answers, started_at } = req.body;
+  const examId = req.params.examId;
 
-    if (!user_id || !exam_id || !answers) {
+  try {
+    const { answers, user_id } = req.body;
+
+    if (!user_id || !examId || !answers) {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
     // Fetch all questions for this exam from exam-service
     const examServiceUrl = process.env.EXAM_SERVICE_URL 
-    const { data: questions } = await axios.get(
-      `${examServiceUrl}/${exam_id}/questions`
+    const { status, data: questions, error } = await axios.get(
+      `${examServiceUrl}/${examId}`
     );
+    console.log(status, questions, error);
+    if (status !== 200) {
+      return res.status(status).json({ message: error });
+    }
 
-    console.log(questions);
 
- // Map question_id to question details for quick lookup
+    if (!questions) {
+      return res.status(404).json({ message: "Exam not found" });
+    }
+
+    // Map question_id to question details for quick lookup
     const questionMap = {};
     questions.forEach((q) => {
       questionMap[q._id] = q;
@@ -53,10 +62,9 @@ const submitExam = async (req, res) => {
 
     const submission = new Submission({
       user_id,
-      exam_id,
+      exam_id: examId,
       answers: enrichedAnswers,
       totalScore,
-      started_at,
       submitted_at,
     });
 
