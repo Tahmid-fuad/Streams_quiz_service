@@ -13,13 +13,16 @@ import AdminProfile from "./pages/AdminProfile";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminExamQuestions from "./pages/AdminExamQuestion";
 import AccessDenied from "./pages/AccessDenied";
+import HomePage from "./pages/home";
+import TakeExam from "./components/exampage";
 
 function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path="/exampage" element={<TakeExam/>} />
+          <Route path="/" element={<HomePage/>} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/access-denied" element={<AccessDenied />} />
