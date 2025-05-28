@@ -291,6 +291,19 @@ const changeUserPassword = async (req, res) => {
   }
 };
 
+// Get all users (admin access only)
+const getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find({}, "name email role"); // fetch only these fields
+    res.status(200).json({
+      message: "Users fetched successfully",
+      users,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching users", error: error.message });
+  }
+};
+
 
 module.exports = {
   registerUser,
@@ -301,4 +314,5 @@ module.exports = {
   changeUserName,
   updateEmail,
   changeUserPassword,
+  getAllUsers,
 };
