@@ -9,13 +9,16 @@ const examSchema = new mongoose.Schema(
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Question",
-        required: true,
       },
     ],
     total_score: {
       type: Number,
       required: true,
       default: 0,
+    },
+    start_time: {
+      type: Date,
+      required: true,
     },
   },
   {

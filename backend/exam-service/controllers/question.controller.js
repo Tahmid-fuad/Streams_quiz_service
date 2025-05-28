@@ -1,4 +1,6 @@
+import mongoose from "mongoose";
 import Question from "../models/question.model.js";
+import Exam from "../models/exam.model.js";
 
 // Get all Questions
 const getAllQuestions = async (req, res) => {
@@ -7,6 +9,47 @@ const getAllQuestions = async (req, res) => {
 
     if (!examId) {
       return res.status(400).json({ message: "Exam ID is required" });
+    } else {
+      // Check if the examId is valid object ID and the exam exists
+      if (mongoose.Types.ObjectId.isValid(examId)) {
+        const exam = await Exam.findById(examId);
+        if (!exam) {
+          return res.status(404).json({ message: "Exam not found!" });
+        }
+      } else {
+        return res.status(400).json({
+          message: "Invalid Exam ID format. Please provide a valid object ID",
+        });
+      }
+    }
+    // Fetch the questions for the given examId without the answer field
+    const questions = await Question.find({ examId: examId }).select(
+      "-correctOption"
+    );
+    if (!questions || questions.length === 0) {
+      return res.status(404).json({ message: "Questions not found" });
+    }
+
+    res.status(200).json(questions);
+  } catch (error) {
+    res
+      .status(404)
+      .json({ message: "Error fetching questions", error: error.message });
+  }
+};
+
+const getAllQNA = async (req, res) => {
+  try {
+    const { examId } = req.params;
+
+    if (!examId) {
+      return res.status(400).json({ message: "Exam ID is required" });
+    } else {
+      // Check if the exam exists
+      const exam = await Exam.findById(examId);
+      if (!exam) {
+        return res.status(404).json({ message: "Exam not found!" });
+      }
     }
     // Fetch the questions for the given examId
     const questions = await Question.find({ examId: examId });
@@ -45,6 +88,18 @@ const createQuestion = async (req, res) => {
 
   if (!examId) {
     return res.status(400).json({ message: "Exam ID is required" });
+  } else {
+    // Check if the examId is valid object ID and the exam exists
+    if (mongoose.Types.ObjectId.isValid(examId)) {
+      const exam = await Exam.findById(examId);
+      if (!exam) {
+        return res.status(404).json({ message: "Exam not found!" });
+      }
+    } else {
+      return res.status(400).json({
+        message: "Invalid Exam ID format. Please provide a valid object ID",
+      });
+    }
   }
 
   try {
@@ -56,7 +111,54 @@ const createQuestion = async (req, res) => {
       examId,
     });
     await newQuestion.save();
+    await Exam.findByIdAndUpdate(
+      examId,
+      { $push: { questionIds: newQuestion._id } },
+      { new: true }
+    );
     res.status(201).json(newQuestion);
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Error creating question", error: error.message });
+  }
+};
+
+const createMultipleQuestions = async (req, res) => {
+  const { questions } = req.body;
+  const { examId } = req.params;
+
+  if (!examId) {
+    return res.status(400).json({ message: "Exam ID is required" });
+  }
+
+  try {
+    questions.forEach((question) => {
+      if (
+        !question.question_text ||
+        !question.options ||
+        !question.correctOption
+      ) {
+        throw new Error("All fields are required for each question");
+      }
+      question.examId = examId;
+    });
+
+    const newQuestions = await Question.insertMany(questions);
+    if (!newQuestions || newQuestions.length === 0) {
+      return res.status(400).json({ message: "No questions created" });
+    }
+
+    const exam = await Exam.findByIdAndUpdate(
+      examId,
+      { $push: { questionIds: { $each: newQuestions.map((q) => q._id) } } },
+      { new: true }
+    );
+    if (!exam) {
+      return res.status(404).json({ message: "Exam not found!" });
+    }
+
+    res.status(201).json(newQuestions);
   } catch (error) {
     res
       .status(500)
@@ -103,15 +205,19 @@ const deleteQuestion = async (req, res) => {
 
 export {
   getAllQuestions,
+  getAllQNA,
   getQuestionById,
   createQuestion,
+  createMultipleQuestions,
   updateQuestion,
   deleteQuestion,
 };
 export default {
   getAllQuestions,
+  getAllQNA,
   getQuestionById,
   createQuestion,
+  createMultipleQuestions,
   updateQuestion,
   deleteQuestion,
 };
