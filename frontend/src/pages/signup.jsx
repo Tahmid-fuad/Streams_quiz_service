@@ -54,7 +54,8 @@ export default function Signup() {
         setErrorMessage(response.message || "Signup failed. Please try again.");
       }
     } catch (error) {
-      setErrorMessage(error.message || "An error occurred. Please try again.");
+      const backendMessage = error?.response?.data?.message;
+      setErrorMessage(backendMessage || error.message || "An error occurred. Please try again.");
     }
   };
 

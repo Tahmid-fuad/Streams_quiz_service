@@ -14,7 +14,7 @@ export default function AdminProfile() {
   });
 
   const [editMode, setEditMode] = useState(false);
-  const [newAdmin, setNewAdmin] = useState({ email: "", newRole: "Student" });
+  const [newAdmin, setNewAdmin] = useState({ email: "", newRole: "student" });
   const [passwords, setPasswords] = useState({ currentPassword: "", newPassword: "" });
   const [message, setMessage] = useState({ type: "", text: "" });
   const [roleMessage, setRoleMessage] = useState({ type: "", text: "" });
@@ -76,19 +76,20 @@ export default function AdminProfile() {
     }
   };
 
-  const handleRoleSwitch = async (e) => {
-    e.preventDefault();
-    try {
-      await switchUserRole({
-        email: newAdmin.email,
-        newRole: newAdmin.newRole,
-      });
-      setRoleMessage({ type: "success", text: `User role updated to ${newAdmin.newRole}.` });
-      setNewAdmin({ email: "", newRole: "Student" });
-    } catch {
-      setRoleMessage({ type: "error", text: "Failed to update user role." });
-    }
-  };
+const handleRoleSwitch = async (e) => {
+  e.preventDefault();
+  const roleToDisplay = newAdmin.newRole;
+  try {
+    await switchUserRole({
+      email: newAdmin.email,
+      newRole: roleToDisplay,
+    });
+    setRoleMessage({ type: "success", text: `User role updated to ${roleToDisplay}.` });
+    setNewAdmin({ email: "", newRole: "student" });
+  } catch {
+    setRoleMessage({ type: "error", text: "Failed to update user role." });
+  }
+};
 
 
   return (
