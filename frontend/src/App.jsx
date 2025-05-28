@@ -1,12 +1,10 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Home from "./pages/home";
-import UserDashboard from "./pages/user";
 import Login from "./pages/login";
 import Signup from "./pages/signup";
 import Profile from "./pages/profile";
 import Dashboard from "./pages/dashboard";
 import Exams from "./pages/exams";
-import Admin from "./pages/Admin";
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminExams from "./pages/AdminExams";
@@ -14,6 +12,7 @@ import AdminUsers from "./pages/AdminUsers";
 import AdminProfile from "./pages/AdminProfile";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminExamQuestions from "./pages/AdminExamQuestion";
+import AccessDenied from "./pages/AccessDenied";
 
 function App() {
   return (
@@ -23,13 +22,14 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
-        
+          <Route path="/access-denied" element={<AccessDenied />} />
+
           <Route element={<ProtectedRoute allowedRole="student" />}>
-            <Route path="/user" element={<UserDashboard />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/exams" element={<Exams />} />
           </Route>
+
           <Route element={<ProtectedRoute allowedRole="admin" />}>
             <Route path="/admin" element={<AdminProfile />} />
             <Route path="/admin/exams" element={<AdminExams />} />
@@ -37,6 +37,8 @@ function App() {
             <Route path="/admin/examquestions" element={<AdminExamQuestions />} />
             <Route path="/admin/users" element={<AdminUsers />} />
           </Route>
+
+          <Route path="*" element={<AccessDenied />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

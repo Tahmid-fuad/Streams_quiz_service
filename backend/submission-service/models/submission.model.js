@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const answerSchema = new mongoose.Schema({
   question_id: String,
   selected_option: String,
+  correct_option: String,
 });
 
 const submissionSchema = new mongoose.Schema(
@@ -10,7 +11,7 @@ const submissionSchema = new mongoose.Schema(
     user_id: String,
     exam_id: String,
     answers: [answerSchema],
-    score: Number,
+    totalScore: Number,
     started_at: Date,
     submitted_at: Date,
   },

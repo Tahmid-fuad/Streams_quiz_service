@@ -1,6 +1,7 @@
 import { useState } from "react";
-import AdminNavbar from "../components/AdminNavbar";
 import { useNavigate } from "react-router-dom";
+import Navbar from "../components/NavBar";
+import Footer from "../components/Footer";
 
 export default function AdminExamSetup() {
   const [exam, setExam] = useState({
@@ -8,7 +9,7 @@ export default function AdminExamSetup() {
     fullMarks: "",
     duration: "",
   });
-
+  const [successMessage, setSuccessMessage] = useState(""); // New state for success message
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -20,20 +21,25 @@ export default function AdminExamSetup() {
 
     // Save exam setup info in localStorage
     localStorage.setItem("currentExam", JSON.stringify(exam));
-    alert("Exam setup saved!");
+    setSuccessMessage("Exam setup saved! Redirecting to add questions...");
 
-    // Redirect to questions page
-    navigate("/admin/examquestions");
+    // Redirect to questions page after 2 seconds
+    setTimeout(() => {
+      navigate("/admin/examquestions");
+    }, 2500);
   };
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <AdminNavbar />
+      <Navbar />
       <div className="container mx-auto p-6 max-w-xl">
         <div className="bg-white p-8 rounded-lg shadow">
           <h2 className="text-2xl font-bold mb-6 text-indigo-700 border-b pb-2">
             🗂️ Create New Exam
           </h2>
+          {successMessage && (
+            <p className="text-green-500 text-sm text-center mb-4">{successMessage}</p>
+          )}
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <label className="block font-medium mb-1">Subject Name</label>
@@ -77,6 +83,7 @@ export default function AdminExamSetup() {
           </form>
         </div>
       </div>
+      <Footer />
     </div>
   );
 }

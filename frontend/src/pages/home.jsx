@@ -1,9 +1,9 @@
-import Header from "../components/Header"; // Ensure case matches file name
+import Navbar from "../components/NavBar";
 
 function Home() {
   return (
     <div className="min-h-screen bg-gray-100">
-      <Header />
+      <Navbar />
       <main className="container mx-auto p-4">
         <section className="text-center py-12 bg-white rounded-lg shadow-md mb-6">
           <h1 className="text-4xl font-bold text-gray-800 mb-4">
