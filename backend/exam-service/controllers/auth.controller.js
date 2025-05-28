@@ -16,13 +16,17 @@ const register = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // generate OTP
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otpValue = Math.floor(100000 + Math.random() * 900000).toString();
 
     const user = new User({
       name,
       email,
       password: hashedPassword,
-      otp,
+      otp: {
+        value: otpValue,
+        expiresIn: new Date(Date.now() + 15 * 60 * 1000), // 15 minutes expiration
+        verified: false, // Initially not verified
+      },
     });
     await user.save();
     res.status(201).send("Success! User Registered.");
