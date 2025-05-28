@@ -3,30 +3,30 @@ import Navbar from "../components/NavBar";
 import Footer from "../components/Footer";
 
 const upcomingExams = [
-  { id: 1, subject: "Math", date: "2025-06-10", time: "10:00 AM - 12:00 PM", duration: "2 hours" },
-  { id: 2, subject: "Science", date: "2025-06-12", time: "10:00 AM - 12:00 PM", duration: "2 hours" },
-  { id: 3, subject: "Geography", date: "2025-06-14", time: "11:00 AM - 1:00 PM", duration: "2 hours" },
-  { id: 4, subject: "Computer Science", date: "2025-06-15", time: "9:00 AM - 11:00 AM", duration: "2 hours" },
-  { id: 5, subject: "Economics", date: "2025-06-17", time: "1:00 PM - 3:00 PM", duration: "2 hours" },
-  { id: 6, subject: "Physical Education", date: "2025-06-18", time: "10:30 AM - 12:00 PM", duration: "1.5 hours" },
+  { id: 1, subject: "Math", title: "Final Term Algebra Test", date: "2025-06-10", time: "10:00 AM - 12:00 PM", duration: "2 hours" },
+  { id: 2, subject: "Science", title: "Chemistry Theory Exam", date: "2025-06-12", time: "10:00 AM - 12:00 PM", duration: "2 hours" },
+  { id: 3, subject: "Geography", title: "Maps & Environment Quiz", date: "2025-06-14", time: "11:00 AM - 1:00 PM", duration: "2 hours" },
+  { id: 4, subject: "Computer Science", title: "Python Coding Test", date: "2025-06-15", time: "9:00 AM - 11:00 AM", duration: "2 hours" },
+  { id: 5, subject: "Economics", title: "Microeconomics Analysis", date: "2025-06-17", time: "1:00 PM - 3:00 PM", duration: "2 hours" },
+  { id: 6, subject: "Physical Education", title: "Fitness and Wellness Quiz", date: "2025-06-18", time: "10:30 AM - 12:00 PM", duration: "1.5 hours" },
 ];
 
 const ongoingExams = [
-  { id: 7, subject: "History", date: "2025-05-26", time: "9:00 AM - 11:00 AM", duration: "2 hours", status: "Ongoing" },
-  { id: 8, subject: "Biology", date: "2025-05-26", time: "11:00 AM - 1:00 PM", duration: "2 hours", status: "Ongoing" },
-  { id: 9, subject: "Chemistry", date: "2025-05-26", time: "2:00 PM - 4:00 PM", duration: "2 hours", status: "Ongoing" },
-  { id: 10, subject: "Environmental Science", date: "2025-05-26", time: "1:00 PM - 3:00 PM", duration: "2 hours", status: "Ongoing" },
-  { id: 11, subject: "Civics", date: "2025-05-26", time: "3:00 PM - 5:00 PM", duration: "2 hours", status: "Ongoing" },
-  { id: 12, subject: "Language Studies", date: "2025-05-26", time: "4:00 PM - 5:30 PM", duration: "1.5 hours", status: "Ongoing" },
+  { id: 7, subject: "History", title: "World War II Assessment", date: "2025-05-26", time: "9:00 AM - 11:00 AM", duration: "2 hours", status: "Ongoing" },
+  { id: 8, subject: "Biology", title: "Genetics and Evolution", date: "2025-05-26", time: "11:00 AM - 1:00 PM", duration: "2 hours", status: "Ongoing" },
+  { id: 9, subject: "Chemistry", title: "Periodic Table Concepts", date: "2025-05-26", time: "2:00 PM - 4:00 PM", duration: "2 hours", status: "Ongoing" },
+  { id: 10, subject: "Environmental Science", title: "Climate Change Quiz", date: "2025-05-26", time: "1:00 PM - 3:00 PM", duration: "2 hours", status: "Ongoing" },
+  { id: 11, subject: "Civics", title: "Government and Constitution", date: "2025-05-26", time: "3:00 PM - 5:00 PM", duration: "2 hours", status: "Ongoing" },
+  { id: 12, subject: "Language Studies", title: "Grammar and Composition", date: "2025-05-26", time: "4:00 PM - 5:30 PM", duration: "1.5 hours", status: "Ongoing" },
 ];
 
 const completedExams = [
-  { id: 13, subject: "English", date: "2025-05-20", time: "10:00 AM - 12:00 PM", duration: "2 hours", score: 88 },
-  { id: 14, subject: "Art", date: "2025-05-22", time: "1:00 PM - 2:30 PM", duration: "1.5 hours", score: 95 },
-  { id: 15, subject: "Physics", date: "2025-05-18", time: "9:00 AM - 11:00 AM", duration: "2 hours", score: 81 },
-  { id: 16, subject: "Sociology", date: "2025-05-19", time: "11:00 AM - 1:00 PM", duration: "2 hours", score: 73 },
-  { id: 17, subject: "Business Studies", date: "2025-05-21", time: "2:00 PM - 4:00 PM", duration: "2 hours", score: 66 },
-  { id: 18, subject: "Music", date: "2025-05-23", time: "9:30 AM - 11:00 AM", duration: "1.5 hours", score: 92 },
+  { id: 13, subject: "English", title: "Literature Essay Exam", date: "2025-05-20", time: "10:00 AM - 12:00 PM", duration: "2 hours", score: 88 },
+  { id: 14, subject: "Art", title: "Color Theory Practical", date: "2025-05-22", time: "1:00 PM - 2:30 PM", duration: "1.5 hours", score: 95 },
+  { id: 15, subject: "Physics", title: "Mechanics Final", date: "2025-05-18", time: "9:00 AM - 11:00 AM", duration: "2 hours", score: 81 },
+  { id: 16, subject: "Sociology", title: "Social Behavior Assessment", date: "2025-05-19", time: "11:00 AM - 1:00 PM", duration: "2 hours", score: 73 },
+  { id: 17, subject: "Business Studies", title: "Market Strategies Exam", date: "2025-05-21", time: "2:00 PM - 4:00 PM", duration: "2 hours", score: 66 },
+  { id: 18, subject: "Music", title: "Theory and Composition Test", date: "2025-05-23", time: "9:30 AM - 11:00 AM", duration: "1.5 hours", score: 100 },
 ];
 
 export default function Exams({ currentPage, setCurrentPage }) {
@@ -40,7 +40,6 @@ export default function Exams({ currentPage, setCurrentPage }) {
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-white text-gray-800 flex flex-col">
       <Navbar currentPage={currentPage} setCurrentPage={setCurrentPage} />
       <main className="container mx-auto px-4 py-8 flex-grow">
-        {/* Toggle Buttons */}
         <div className="flex justify-center gap-4 mb-10">
           {["upcoming", "ongoing", "completed"].map((type) => (
             <button
@@ -56,14 +55,14 @@ export default function Exams({ currentPage, setCurrentPage }) {
           ))}
         </div>
 
-        {/* UPCOMING EXAMS */}
         {view === "upcoming" && (
           <section className="mb-12">
             <h3 className={sectionTitleStyle}>📅 Upcoming Exams</h3>
             <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
               {upcomingExams.map((exam) => (
                 <div key={exam.id} className={cardStyle}>
-                  <h4 className="text-xl font-bold text-indigo-700 mb-2">{exam.subject}</h4>
+                  <h4 className="text-xl font-bold text-indigo-700 mb-1">{exam.subject}</h4>
+                  <p className="text-gray-600 mb-2 italic">{exam.title}</p>
                   <div className="text-sm text-gray-700 space-y-1 mb-4">
                     <p><strong>📆 Date:</strong> {exam.date}</p>
                     <p><strong>🕒 Time:</strong> {exam.time}</p>
@@ -78,14 +77,14 @@ export default function Exams({ currentPage, setCurrentPage }) {
           </section>
         )}
 
-        {/* ONGOING EXAMS */}
         {view === "ongoing" && (
           <section className="mb-12">
             <h3 className={sectionTitleStyle}>🟢 Ongoing Exams</h3>
             <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
               {ongoingExams.map((exam) => (
                 <div key={exam.id} className={cardStyle}>
-                  <h4 className="text-xl font-bold text-indigo-700 mb-2">{exam.subject}</h4>
+                  <h4 className="text-xl font-bold text-indigo-700 mb-1">{exam.subject}</h4>
+                  <p className="text-gray-600 mb-2 italic">{exam.title}</p>
                   <div className="text-sm text-gray-700 space-y-1 mb-4">
                     <p><strong>📆 Date:</strong> {exam.date}</p>
                     <p><strong>🕒 Time:</strong> {exam.time}</p>
@@ -101,14 +100,14 @@ export default function Exams({ currentPage, setCurrentPage }) {
           </section>
         )}
 
-        {/* COMPLETED EXAMS */}
         {view === "completed" && (
           <section className="mb-12">
             <h3 className={sectionTitleStyle}>✅ Completed Exams</h3>
             <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
               {completedExams.map((exam) => (
                 <div key={exam.id} className={cardStyle}>
-                  <h4 className="text-xl font-bold text-indigo-700 mb-2">{exam.subject}</h4>
+                  <h4 className="text-xl font-bold text-indigo-700 mb-1">{exam.subject}</h4>
+                  <p className="text-gray-600 mb-2 italic">{exam.title}</p>
                   <div className="text-sm text-gray-700 space-y-1">
                     <p><strong>📆 Date:</strong> {exam.date}</p>
                     <p><strong>🕒 Time:</strong> {exam.time}</p>
@@ -144,7 +143,6 @@ export default function Exams({ currentPage, setCurrentPage }) {
           </section>
         )}
       </main>
-
       <Footer />
     </div>
   );

@@ -157,6 +157,7 @@ export default function AdminDashboard() {
             </ResponsiveContainer>
           </div>
         </div>
+        
       </div>
       <Footer />
     </div>
