@@ -149,9 +149,21 @@ const createMultipleQuestions = async (req, res) => {
       return res.status(400).json({ message: "No questions created" });
     }
 
+    const newQuestionsScore = newQuestions.reduce(
+      (total, q) => total + q.score,
+      0
+    );
+
     const exam = await Exam.findByIdAndUpdate(
       examId,
-      { $push: { questionIds: { $each: newQuestions.map((q) => q._id) } } },
+      {
+        $push: {
+          questionIds: { $each: newQuestions.map((q) => q._id) },
+        },
+        $inc: {
+          total_score: newQuestionsScore,
+        },
+      },
       { new: true }
     );
     if (!exam) {
