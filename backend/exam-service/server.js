@@ -30,9 +30,10 @@ import authRoutes from "./routes/auth.route.js";
 app.use("/api/auth", authRoutes);
 
 // => Exam routes
+import examAdminRoutes from "./routes/exam.admin.route.js";
 import examRoutes from "./routes/exam.route.js";
-app.use("/api/admin/exams", examRoutes);
-app.use("/api/user/exams", examRoutes);
+app.use("/api/admin/exams", examAdminRoutes);
+app.use("/api/exams", examRoutes);
 
 // => Base Route
 app.get("/", (req, res) => {
