@@ -1,193 +1,205 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import Navbar from "../components/NavBar";
 import Footer from "../components/Footer";
+import { AuthContext } from "./../context/AuthContext";
+import { changeName, changeEmail, switchUserRole, changePassword } from "../services/api/auth";
 
 export default function AdminProfile() {
+  const { user } = useContext(AuthContext);
+
   const [adminInfo, setAdminInfo] = useState({
-    name: "John Doe",
-    email: "admin@example.com",
-    role: "Super Admin",
-    joined: "2022-01-15",
-    phone: "+1 555 123 4567",
-    address: "123 Admin St, Exam City, USA",
+    name: user?.name || "John Doe",
+    email: user?.email || "admin@example.com",
+    role: user?.role || "Admin",
   });
 
   const [editMode, setEditMode] = useState(false);
-  const [newAdmin, setNewAdmin] = useState({ email: "", password: "" });
-  const [message, setMessage] = useState("");
+  const [newAdmin, setNewAdmin] = useState({ email: "", newRole: "student" });
+  const [passwords, setPasswords] = useState({ currentPassword: "", newPassword: "" });
+  const [message, setMessage] = useState({ type: "", text: "" });
+  const [roleMessage, setRoleMessage] = useState({ type: "", text: "" });
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setAdminInfo((prev) => ({ ...prev, [name]: value }));
-  };
 
-  const handleSave = (e) => {
+  const handleSave = async (e) => {
     e.preventDefault();
-    setMessage("Personal info updated successfully!");
-    setEditMode(false);
-  };
+    let success = [];
+    let failure = [];
 
-  const handleAddAdmin = (e) => {
-    e.preventDefault();
-    if (!newAdmin.email || !newAdmin.password) {
-      setMessage("Please fill in all new admin fields.");
-      return;
+    try {
+      if (adminInfo.name !== user.name) {
+        await changeName({ email: user.email, newName: adminInfo.name });
+        success.push("Name");
+      }
+
+      if (adminInfo.email !== user.email) {
+        await changeEmail({ email: user.email, newEmail: adminInfo.email });
+        success.push("Email");
+      }
+
+      if (passwords.currentPassword && passwords.newPassword) {
+        try {
+          await changePassword({
+            email: user.email,
+            currentPassword: passwords.currentPassword,
+            newPassword: passwords.newPassword,
+          });
+          success.push("Password");
+        } catch (err) {
+          const msg = err?.response?.data?.message || "Failed to change Password";
+          failure.push("Password (" + msg + ")");
+        }
+      }
+
+      if (success.length > 0 && failure.length === 0) {
+        setMessage({ type: "success", text: `${success.join(", ")} updated successfully.` });
+      } else if (success.length > 0 && failure.length > 0) {
+        setMessage({
+          type: "warning",
+          text: `${success.join(", ")} updated. But ${failure.join(", ")} failed.`,
+        });
+      } else if (failure.length > 0) {
+        setMessage({
+          type: "error",
+          text: `Update failed: ${failure.join(", ")}`,
+        });
+      } else {
+        setMessage({
+          type: "info",
+          text: "No changes made.",
+        });
+      }
+    } catch (error) {
+      setMessage({ type: "error", text: "An unexpected error occurred." });
+    } finally {
+      setPasswords({ currentPassword: "", newPassword: "" });
+      setEditMode(false);
     }
-    setMessage(`New admin (${newAdmin.email}) added successfully!`);
-    setNewAdmin({ email: "", password: "" });
   };
+
+const handleRoleSwitch = async (e) => {
+  e.preventDefault();
+  const roleToDisplay = newAdmin.newRole;
+  try {
+    await switchUserRole({
+      email: newAdmin.email,
+      newRole: roleToDisplay,
+    });
+    setRoleMessage({ type: "success", text: `User role updated to ${roleToDisplay}.` });
+    setNewAdmin({ email: "", newRole: "student" });
+  } catch {
+    setRoleMessage({ type: "error", text: "Failed to update user role." });
+  }
+};
+
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
       <Navbar />
-
       <div className="container mx-auto p-6">
-        <h2 className="text-4xl font-extrabold text-blue-800 mb-8 text-center tracking-wide">
-          👤 Admin Profile
-        </h2>
+        <h2 className="text-4xl font-extrabold text-blue-800 mb-8 text-center tracking-wide">👤 Admin Profile</h2>
 
+        {/* Personal Information */}
         <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-8 border-2 border-blue-300">
-          {/* Profile Details */}
-          <div className="mb-8">
-            <h3 className="text-2xl font-semibold text-blue-700 mb-4 border-b border-blue-300 pb-2">
-              Personal Information
-            </h3>
-            {!editMode ? (
-              <div className="space-y-3 text-gray-700 text-lg">
-                <p>
-                  <strong>Name:</strong> {adminInfo.name}
-                </p>
-                <p>
-                  <strong>Email:</strong> {adminInfo.email}
-                </p>
-                <p>
-                  <strong>Role:</strong> {adminInfo.role}
-                </p>
-                <p>
-                  <strong>Joined On:</strong>{" "}
-                  {new Date(adminInfo.joined).toLocaleDateString()}
-                </p>
-                <p>
-                  <strong>Phone:</strong> {adminInfo.phone}
-                </p>
-                <p>
-                  <strong>Address:</strong> {adminInfo.address}
-                </p>
-                <button
-                  onClick={() => {
-                    setEditMode(true);
-                    setMessage("");
-                  }}
-                  className="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-5 rounded-lg transition"
-                >
-                  Edit Info
-                </button>
-              </div>
-            ) : (
-              <form onSubmit={handleSave} className="space-y-4 text-blue-900 font-semibold">
-                <input
-                  type="text"
-                  name="name"
-                  value={adminInfo.name}
-                  onChange={handleChange}
-                  className="w-full p-2 border border-blue-300 rounded focus:outline-blue-500"
-                  placeholder="Name"
-                  required
-                />
-                <input
-                  type="email"
-                  name="email"
-                  value={adminInfo.email}
-                  onChange={handleChange}
-                  className="w-full p-2 border border-blue-300 rounded focus:outline-blue-500"
-                  placeholder="Email"
-                  required
-                />
-                <input
-                  type="text"
-                  name="role"
-                  value={adminInfo.role}
-                  onChange={handleChange}
-                  className="w-full p-2 border border-blue-300 rounded focus:outline-blue-500"
-                  placeholder="Role"
-                />
-                <input
-                  type="tel"
-                  name="phone"
-                  value={adminInfo.phone}
-                  onChange={handleChange}
-                  className="w-full p-2 border border-blue-300 rounded focus:outline-blue-500"
-                  placeholder="Phone"
-                />
-                <input
-                  type="text"
-                  name="address"
-                  value={adminInfo.address}
-                  onChange={handleChange}
-                  className="w-full p-2 border border-blue-300 rounded focus:outline-blue-500"
-                  placeholder="Address"
-                />
+          <h3 className="text-2xl font-semibold text-blue-700 mb-4 border-b border-blue-300 pb-2">Personal Information</h3>
 
-                <div className="flex gap-4 mt-2">
-                  <button
-                    type="submit"
-                    className="bg-teal-600 hover:bg-teal-700 text-white font-semibold py-2 px-6 rounded-lg transition"
-                  >
-                    Save
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setEditMode(false);
-                      setMessage("");
-                    }}
-                    className="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-6 rounded-lg transition"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </form>
-            )}
-          </div>
-
-          <hr className="my-8 border-blue-300" />
-
-          {/* Add New Admin */}
-          <div>
-            <h3 className="text-2xl font-semibold text-blue-700 mb-4 border-b border-blue-300 pb-2">
-              Add New Admin
-            </h3>
-            <form onSubmit={handleAddAdmin} className="space-y-4 max-w-md">
+          {!editMode ? (
+            <div className="space-y-3 text-gray-700 text-lg">
+              <p><strong>Name:</strong> {adminInfo.name}</p>
+              <p><strong>Email:</strong> {adminInfo.email}</p>
+              <p><strong>Role:</strong> {adminInfo.role}</p>
+              <button onClick={() => setEditMode(true)} className="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-5 rounded-lg">
+                Edit Info
+              </button>
+            </div>
+          ) : (
+            <form onSubmit={handleSave} className="space-y-4 text-blue-900 font-semibold">
+              <input
+                type="text"
+                name="name"
+                value={adminInfo.name}
+                onChange={(e) => setAdminInfo({ ...adminInfo, name: e.target.value })}
+                className="w-full p-2 border rounded"
+                required
+              />
               <input
                 type="email"
-                placeholder="Email"
-                value={newAdmin.email}
-                onChange={(e) => setNewAdmin({ ...newAdmin, email: e.target.value })}
-                className="w-full p-3 border border-blue-300 rounded-lg focus:outline-blue-500 text-blue-900 font-semibold"
+                name="email"
+                value={adminInfo.email}
+                onChange={(e) => setAdminInfo({ ...adminInfo, email: e.target.value })}
+                className="w-full p-2 border rounded"
                 required
               />
               <input
                 type="password"
-                placeholder="Password"
-                value={newAdmin.password}
-                onChange={(e) => setNewAdmin({ ...newAdmin, password: e.target.value })}
-                className="w-full p-3 border border-blue-300 rounded-lg focus:outline-blue-500 text-blue-900 font-semibold"
-                required
+                name="currentPassword"
+                placeholder="Current Password"
+                value={passwords.currentPassword}
+                onChange={e => setPasswords(p => ({ ...p, currentPassword: e.target.value }))}
+                className="w-full p-2 border rounded"
               />
-              <button
-                type="submit"
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition"
-              >
-                Add Admin
-              </button>
-            </form>
-          </div>
+              <input
+                type="password"
+                name="newPassword"
+                placeholder="New Password"
+                value={passwords.newPassword}
+                onChange={e => setPasswords(p => ({ ...p, newPassword: e.target.value }))}
+                className="w-full p-2 border rounded"
+              />
 
-          {message && (
-            <p className="mt-6 text-center text-teal-700 font-semibold text-lg animate-pulse">
-              {message}
+              <div className="flex gap-4">
+                <button type="submit" className="bg-teal-600 text-white px-6 py-2 rounded">Save</button>
+                <button type="button" onClick={() => setEditMode(false)} className="bg-red-500 text-white px-6 py-2 rounded">Cancel</button>
+              </div>
+            </form>
+          )}
+
+          {message.text && (
+            <p
+              className={`mt-4 text-center font-semibold ${message.type === "success"
+                ? "text-green-600"
+                : message.type === "error"
+                  ? "text-red-600"
+                  : message.type === "warning"
+                    ? "text-yellow-600"
+                    : "text-gray-600"
+                }`}
+            >
+              {message.text}
             </p>
           )}
+        </div>
+
+        {/* Admin Settings Section */}
+        <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-8 border-2 border-blue-300 mt-12">
+          <h3 className="text-2xl font-semibold text-blue-700 mb-4 border-b border-blue-300 pb-2">Admin Settings</h3>
+
+          <form onSubmit={handleRoleSwitch} className="space-y-4 max-w-md">
+            <input
+              type="email"
+              placeholder="User Email"
+              value={newAdmin.email}
+              onChange={(e) => setNewAdmin({ ...newAdmin, email: e.target.value })}
+              className="w-full p-3 border rounded"
+              required
+            />
+            <select
+              value={newAdmin.newRole}
+              onChange={(e) => setNewAdmin({ ...newAdmin, newRole: e.target.value })}
+              className="w-full p-3 border rounded"
+            >
+              <option value="admin">Admin</option>
+              <option value="student">Student</option>
+            </select>
+
+            <button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded">Change Role</button>
+            
+            {roleMessage.text && (
+              <p className={`mt-4 font-semibold text-center ${roleMessage.type === "success" ? "text-green-600" : "text-red-600"}`}>
+                {roleMessage.text}
+              </p>
+            )}
+
+          </form>
         </div>
       </div>
       <Footer />

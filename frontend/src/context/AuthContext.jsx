@@ -1,5 +1,5 @@
 import { createContext, useState, useEffect } from "react";
-import { getRole } from "../services/api/auth";
+import { getRole, getProfile } from "../services/api/auth";
 
 export const AuthContext = createContext();
 
@@ -17,9 +17,17 @@ export const AuthProvider = ({ children }) => {
     }
 
     try {
-      const response = await getRole();
-      if (response.role && response.email) {
-        setUser({ email: response.email, role: response.role });
+      const [roleResponse, profileResponse] = await Promise.all([
+        getRole(),
+        getProfile()
+      ]);
+
+      if (roleResponse?.role && roleResponse?.email && profileResponse?.name) {
+        setUser({
+          name: profileResponse.name,
+          email: roleResponse.email, 
+          role: roleResponse.role
+        });
         return true;
       } else {
         logout();
@@ -34,16 +42,16 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
-  return new Promise((resolve) => {
-    setIsLoggingOut(true);
-    localStorage.removeItem("token");
-    setUser(null);
-    setTimeout(() => {
-      setIsLoggingOut(false);
-      resolve(); // Only resolve after setting flag
-    }, 100); // Give a slight delay to ensure ProtectedRoute sees isLoggingOut = true
-  });
-};
+    return new Promise((resolve) => {
+      setIsLoggingOut(true);
+      localStorage.removeItem("token");
+      setUser(null);
+      setTimeout(() => {
+        setIsLoggingOut(false);
+        resolve(); // Only resolve after setting flag
+      }, 100); // Give a slight delay to ensure ProtectedRoute sees isLoggingOut = true
+    });
+  };
 
   useEffect(() => {
     checkToken();

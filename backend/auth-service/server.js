@@ -11,7 +11,7 @@ const FRONT_END= process.env.FRONT_END_URL
 // Enable CORS for frontend at http://localhost:5173
 app.use(cors({
   origin: `http://localhost:${FRONT_END}`,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], 
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'], 
   allowedHeaders: ['Content-Type', 'Authorization'], 
   credentials: true 
 }));

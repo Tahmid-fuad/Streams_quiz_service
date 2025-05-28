@@ -177,10 +177,10 @@ const switchUserRole = async (req, res) => {
 };
 
 const changeUserName = async (req, res) => {
-  const { email, password, newName } = req.body;
+  const { email, newName } = req.body;
 
-  if (!email || !password || !newName) {
-    return res.status(400).json({ message: "Email, password, and new name are required" });
+  if (!email || !newName) {
+    return res.status(400).json({ message: "Email and new name are required" });
   }
 
   try {
@@ -188,12 +188,6 @@ const changeUserName = async (req, res) => {
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
-    }
-
-    const isMatch = await bcrypt.compare(password, user.password);
-
-    if (!isMatch) {
-      return res.status(401).json({ message: "Incorrect password" });
     }
 
     if (user.name === newName) {
@@ -216,11 +210,12 @@ const changeUserName = async (req, res) => {
   }
 };
 
-const updateEmail = async (req, res) => {
-  const { email, password, newEmail } = req.body;
 
-  if (!email || !password || !newEmail) {
-    return res.status(400).json({ message: "Email, current password, and new email are required" });
+const updateEmail = async (req, res) => {
+  const { email, newEmail } = req.body;
+
+  if (!email || !newEmail) {
+    return res.status(400).json({ message: "Email and new email are required" });
   }
 
   try {
@@ -230,24 +225,15 @@ const updateEmail = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Check if the current password matches
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(401).json({ message: "Incorrect password" });
-    }
-
-    // Check if the new email is different from the current one
     if (newEmail === user.email) {
       return res.status(400).json({ message: "You are already using this email" });
     }
 
-    // Check if the new email is already taken
     const emailExists = await User.findOne({ email: newEmail });
     if (emailExists) {
       return res.status(400).json({ message: "This email is already taken" });
     }
 
-    // Update the email
     user.email = newEmail;
     await user.save();
 
@@ -263,6 +249,7 @@ const updateEmail = async (req, res) => {
     res.status(500).json({ message: "Error updating email", error: error.message });
   }
 };
+
 
 const changeUserPassword = async (req, res) => {
   const authHeader = req.headers.authorization;
@@ -304,6 +291,19 @@ const changeUserPassword = async (req, res) => {
   }
 };
 
+// Get all users (admin access only)
+const getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find({}, "name email role"); // fetch only these fields
+    res.status(200).json({
+      message: "Users fetched successfully",
+      users,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching users", error: error.message });
+  }
+};
+
 
 module.exports = {
   registerUser,
@@ -314,4 +314,5 @@ module.exports = {
   changeUserName,
   updateEmail,
   changeUserPassword,
+  getAllUsers,
 };
