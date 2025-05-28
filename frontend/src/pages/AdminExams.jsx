@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
+import { createExam } from "../services/api/quiz";
+import { AuthContext } from "../context/AuthContext";
 import Navbar from "../components/NavBar";
 import Footer from "../components/Footer";
 
@@ -31,22 +33,39 @@ const completedExams = [
 ];
 
 export default function Exams({ currentPage, setCurrentPage }) {
+  const { user } = useContext(AuthContext);
   const [view, setView] = useState("upcoming");
-  const [exam, setExam] = useState({ subject: "", fullMarks: "", duration: "" });
   const [successMessage, setSuccessMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
   const navigate = useNavigate();
+  const [exam, setExam] = useState({ subject: "", fullMarks: "", duration: "", startTime: "" });
 
   const handleChange = (e) => {
     setExam({ ...exam, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    localStorage.setItem("currentExam", JSON.stringify(exam));
-    setSuccessMessage("Exam setup saved! Redirecting to add questions...");
-    setTimeout(() => {
-      navigate("/admin/examquestions");
-    }, 2500);
+    if (!user) {
+      setErrorMessage("Please log in to create an exam");
+      return;
+    }
+    try {
+      const examData = {
+        title: exam.subject,
+        description: exam.subject,
+        duration_minutes: Number(exam.duration),
+        start_time: exam.startTime ? new Date(exam.startTime).toISOString() : undefined,
+      };
+      const response = await createExam(examData);
+      localStorage.setItem("currentExamId", response._id);
+      setSuccessMessage("Exam created! Redirecting to add questions...");
+      setTimeout(() => {
+        navigate("/admin/examquestions");
+      }, 1500);
+    } catch (error) {
+      setErrorMessage("Error creating exam: " + (error.response?.data?.message || error.message));
+    }
   };
 
   const sectionTitleStyle = "text-2xl font-bold mb-6 text-indigo-800 flex items-center gap-2";
@@ -145,6 +164,9 @@ export default function Exams({ currentPage, setCurrentPage }) {
               {successMessage && (
                 <p className="text-green-500 text-sm text-center mb-4">{successMessage}</p>
               )}
+              {errorMessage && (
+                <p className="text-red-500 text-sm text-center mb-4">{errorMessage}</p>
+              )}
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div>
                   <label className="block font-medium mb-1">Subject Name</label>
@@ -157,6 +179,17 @@ export default function Exams({ currentPage, setCurrentPage }) {
                 <div>
                   <label className="block font-medium mb-1">Duration (minutes)</label>
                   <input type="number" name="duration" value={exam.duration} onChange={handleChange} required className="w-full border rounded px-3 py-2" />
+                </div>
+                <div>
+                  <label className="block font-medium mb-1">Start Time</label>
+                  <input
+                    type="datetime-local"
+                    name="startTime"
+                    value={exam.startTime}
+                    onChange={handleChange}
+                    required
+                    className="w-full border rounded px-3 py-2"
+                  />
                 </div>
                 <button type="submit" className="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700 transition">
                   Proceed to Add Questions
