@@ -20,3 +20,23 @@ export const getAllExams = async () => {
   const response = await quizAxiosInstance.get(API_ENDPOINTS.GET_ALL_EXAMS);
   return response.data;
 };
+
+export const updateExam = async (examId, examData) => {
+  const response = await quizAxiosInstance.put(API_ENDPOINTS.UPDATE_EXAM(examId), examData);
+  return response.data;
+};
+
+export const deleteExam = async (examId) => {
+  const response = await quizAxiosInstance.delete(API_ENDPOINTS.DELETE_EXAM(examId));
+  return response.data;
+};
+
+export const updateQuestion = async (examId, questionId, questionData) => {
+  const response = await quizAxiosInstance.put(API_ENDPOINTS.UPDATE_QUESTION(examId, questionId), questionData);
+  return response.data;
+};
+
+export const deleteQuestion = async (examId, questionId) => {
+  const response = await quizAxiosInstance.delete(API_ENDPOINTS.DELETE_QUESTION(examId, questionId));
+  return response.data;
+};
