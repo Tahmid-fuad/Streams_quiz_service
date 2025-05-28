@@ -13,6 +13,7 @@ export default function AdminExamQuestions() {
   });
 
   const [subject, setSubject] = useState("");
+  const [questionList, setQuestionList] = useState([]);
 
   useEffect(() => {
     const exam = JSON.parse(localStorage.getItem("currentExam"));
@@ -29,15 +30,22 @@ export default function AdminExamQuestions() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log(`MCQ for ${subject}:`, mcq);
-    alert(`MCQ submitted for ${subject}`);
-    // Optionally clear form or navigate
+    setQuestionList((prev) => [...prev, mcq]);
+    alert(`Question added for ${subject}`);
+    setMcq({
+      question: "",
+      optionA: "",
+      optionB: "",
+      optionC: "",
+      optionD: "",
+      correct: "",
+    });
   };
 
   return (
     <div className="min-h-screen bg-gray-100">
       <Navbar />
-      <div className="container mx-auto p-6 max-w-2xl">
+      <div className="container mx-auto p-6 max-w-3xl">
         <div className="bg-white p-8 rounded-lg shadow">
           <h2 className="text-2xl font-bold mb-6 text-indigo-700 border-b pb-2">
             📝 Add Questions for: <span className="text-indigo-500">{subject}</span>
@@ -93,9 +101,34 @@ export default function AdminExamQuestions() {
               type="submit"
               className="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700"
             >
-              Submit Question
+              Add Question
             </button>
           </form>
+
+          {/* Display Added Questions */}
+          {questionList.length > 0 && (
+            <div className="mt-10">
+              <h3 className="text-xl font-semibold text-indigo-600 mb-4">📚 Added Questions</h3>
+              <ul className="space-y-4">
+                {questionList.map((q, index) => (
+                  <li key={index} className="bg-gray-50 p-4 rounded shadow">
+                    <p className="font-medium text-gray-800 mb-2">
+                      Q{index + 1}: {q.question}
+                    </p>
+                    <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
+                      <li>A. {q.optionA}</li>
+                      <li>B. {q.optionB}</li>
+                      <li>C. {q.optionC}</li>
+                      <li>D. {q.optionD}</li>
+                    </ul>
+                    <p className="text-sm mt-2 text-green-600 font-semibold">
+                      ✅ Correct Option: {q.correct}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
       </div>
       <Footer />
