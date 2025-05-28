@@ -1,6 +1,6 @@
 import express from "express";
 import examController from "../controllers/exam.controller.js";
-// import { isAuthenticated } from "../middleware/auth.middleware.js";
+import { isAuthenticated } from "../middleware/auth.middleware.js";
 const router = express.Router();
 
 router.get("/", examController.getAllExams);
