@@ -1,88 +1,108 @@
-import { Link, useNavigate } from 'react-router-dom';
-import { useContext } from 'react';
+// components/Navbar.jsx
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useContext, useState } from 'react';
 import { AuthContext } from '../context/AuthContext';
 
 export default function Navbar({ currentPage, setCurrentPage }) {
   const navigate = useNavigate();
-  const { user, setUser } = useContext(AuthContext);
+  const location = useLocation();
+  const { user, logout } = useContext(AuthContext);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    setUser(null);
+  const studentLinks = [
+    { name: 'Dashboard', path: '/dashboard' },
+    { name: 'Exams', path: '/exams' },
+    { name: 'Profile', path: '/profile' },
+  ];
+
+  const adminLinks = [
+    { name: 'Dashboard', path: '/admin/dashboard' },
+    { name: 'Exams', path: '/admin/exams' },
+    { name: 'Users', path: '/admin/users' },
+    { name: 'Profile', path: '/admin' },
+  ];
+
+  const handleLogout = async () => {
+    await logout();
+    setIsMobileMenuOpen(false);
     navigate('/login');
   };
 
-  // Define links for students
-  const studentLinks = ['Dashboard', 'Exams', 'Profile'];
-  // Define links for admins (minimal, can be customized)
-  const adminLinks = [
-    { name: 'Admin Dashboard', path: '/admin' },
-  ];
-
-  // Determine styles based on role
-  const navStyles = user?.role === 'admin'
-    ? 'bg-blue-600 text-white'
-    : 'bg-white shadow-md text-gray-700';
-  const linkStyles = user?.role === 'admin'
-    ? 'hover:text-blue-200'
-    : 'hover:text-indigo-600';
-  const activeLinkStyles = user?.role === 'admin'
-    ? 'text-blue-200 font-semibold'
-    : 'text-indigo-600 font-semibold';
+  // Determine active link: use currentPage for students, location.pathname for admins
+  const isActive = (link) => {
+    if (user?.role === 'student') {
+      return currentPage === link.name || location.pathname === link.path;
+    }
+    return location.pathname === link.path;
+  };
 
   return (
-    <nav className={`py-4 px-6 flex justify-between items-center ${navStyles}`}>
+    <nav className="bg-white shadow-md py-4 px-6 flex justify-between items-center">
+      {/* Brand and Logo */}
       <div className="flex items-center space-x-3">
-        <img src="/STL-Logo-250.png" alt="Logo" className="h-10 w-100" />
-        <span className="text-xl font-bold">
-          {user?.role === 'admin' ? 'Admin Dashboard' : 'EduStream'}
+        <img src="/STL-Logo-250.png" alt="Logo" className="h-10 w-auto" />
+        <span className="text-xl font-bold text-indigo-700">
+          {user?.role === 'admin' ? 'Admin Panel' : 'EduStream'}
         </span>
       </div>
-      <div className="flex items-center space-x-6">
+
+      {/* Mobile Menu Toggle */}
+      <div className="md:hidden">
+        <button
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          className="text-black hover:text-blue-600"
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7" />
+          </svg>
+        </button>
+      </div>
+
+      {/* Navigation Links and User Info */}
+      <div
+        className={`flex items-center space-x-6 md:flex ${isMobileMenuOpen ? 'flex flex-col absolute top-16 left-0 w-full bg-white shadow-md p-4' : 'hidden md:flex'
+          }`}
+      >
         {user ? (
           <>
-            <span className={user?.role === 'admin' ? 'text-white' : 'text-gray-700'}>
-              Welcome, {user.name}
-            </span>
-            <div className="space-x-6 hidden md:flex">
-              {user.role === 'admin' ? (
-                adminLinks.map(link => (
-                  <Link
-                    key={link.name}
-                    to={link.path}
-                    className={`${
-                      currentPage === link.name ? activeLinkStyles : linkStyles
+            <span className="text-black">Welcome, {user.name}</span>
+            <div className="flex items-center space-x-6">
+              {(user?.role === 'admin' ? adminLinks : studentLinks).map((link) => (
+                <Link
+                  key={link.name}
+                  to={link.path}
+                  onClick={() => {
+                    if (user?.role === 'student') {
+                      setCurrentPage && setCurrentPage(link.name);
+                    }
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className={`${isActive(link) ? 'text-blue-600 font-semibold' : 'text-black hover:text-blue-600'
                     } transition`}
-                  >
-                    {link.name}
-                  </Link>
-                ))
-              ) : (
-                studentLinks.map(page => (
-                  <button
-                    key={page}
-                    onClick={() => setCurrentPage(page)}
-                    className={`${
-                      currentPage === page ? activeLinkStyles : linkStyles
-                    } transition`}
-                  >
-                    {page}
-                  </button>
-                ))
-              )}
+                >
+                  {link.name}
+                </Link>
+              ))}
               <button
                 onClick={handleLogout}
-                className={`${linkStyles} transition`}
+                className="bg-red-500 text-white px-4 py-1 rounded-full hover:bg-red-600 transition"
               >
                 Logout
               </button>
             </div>
           </>
         ) : (
-          <span className={user?.role === 'admin' ? 'text-white' : 'text-gray-700'}>
-            Not logged in
-          </span>
+          <div className="flex items-center space-x-6">
+            <Link
+              to="/login"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="bg-indigo-700 text-white px-4 py-1 rounded-full hover:bg-indigo-800 transition"
+            >
+              Login
+            </Link>
+          </div>
         )}
+        {!user && <span className="text-black"></span>}
       </div>
     </nav>
   );

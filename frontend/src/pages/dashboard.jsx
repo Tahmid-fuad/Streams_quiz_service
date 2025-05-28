@@ -1,4 +1,3 @@
-import React, { useState } from "react";
 import {
   BarChart,
   Bar,
@@ -14,6 +13,8 @@ import {
   Area,
   Legend,
 } from "recharts";
+import Navbar from "../components/NavBar";
+import Footer from "../components/Footer";
 
 const examResults = [
   { name: "Math", score: 85 },
@@ -41,84 +42,11 @@ const studyTimeData = [
 
 const pieColors = ["#6366f1", "#10b981", "#f59e0b", "#ef4444", "#3b82f6"];
 
-function Navbar() {
-  return (
-    <nav className="bg-white shadow-md py-4 px-6 flex justify-between items-center">
-      <div className="flex items-center space-x-3">
-        <img src="/STL-Logo-250.png" alt="Logo" className="h-10 w-100" />
-        <span className="text-xl font-bold">EduStream</span>
-      </div>
-      <div className="space-x-6 hidden md:flex">
-        <a href="/dashboard" className="text-indigo-600 font-semibold">
-          Dashboard
-        </a>
-        <a href="/exams" className="text-gray-700 hover:text-indigo-600">
-          Exams
-        </a>
-        <a href="/profile" className="text-gray-700 hover:text-indigo-600">
-          Profile
-        </a>
-      </div>
-    </nav>
-  );
-}
 
-function Footer() {
-  return (
-    <footer className="bg-white border-t mt-12 shadow-inner">
-      <div className="max-w-7xl mx-auto px-6 py-10 grid grid-cols-1 md:grid-cols-3 gap-8 text-gray-700">
-        {/* Brand */}
-        <div>
-          <h2 className="text-xl font-bold text-indigo-600">EduStream</h2>
-          <p className="mt-2 text-sm text-gray-600">
-            Empowering students with insightful tools for academic success.
-          </p>
-        </div>
-
-        {/* Quick Links */}
-        <div>
-          <h3 className="text-lg font-semibold mb-2">Quick Links</h3>
-          <ul className="space-y-1 text-sm">
-            <li>
-              <a href="/dashboard" className="hover:text-indigo-600 transition">
-                Dashboard
-              </a>
-            </li>
-            <li>
-              <a href="/exams" className="hover:text-indigo-600 transition">
-                Exams
-              </a>
-            </li>
-            <li>
-              <a href="/profile" className="hover:text-indigo-600 transition">
-                Profile
-              </a>
-            </li>
-            <li>
-              <a href="#" className="hover:text-indigo-600 transition">
-                Support
-              </a>
-            </li>
-          </ul>
-        </div>
-
-        {/* Contact */}
-        <div>
-          <h3 className="text-lg font-semibold mb-2">Contact Us</h3>
-          <p className="text-sm">Email: support@edustream.com</p>
-          <p className="text-sm">Phone: +1 (800) 123-4567</p>
-          <p className="text-sm mt-2">123 Learning Lane, EduCity, 98765</p>
-        </div>
-      </div>
-    </footer>
-  );
-}
-
-export default function Dashboard() {
+export default function Dashboard({ currentPage, setCurrentPage }) {
   return (
     <div className="min-h-screen bg-gray-100 text-gray-800 flex flex-col">
-      <Navbar />
-
+      <Navbar currentPage={currentPage} setCurrentPage={setCurrentPage} />
       <main className="container mx-auto p-6 mt-6 bg-white rounded-lg shadow flex-grow">
         {/* Correct Answers Bar Chart */}
         <div className="mb-10">
