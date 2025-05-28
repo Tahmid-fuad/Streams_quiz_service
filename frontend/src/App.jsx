@@ -15,14 +15,15 @@ import AdminExamQuestions from "./pages/AdminExamQuestion";
 import AccessDenied from "./pages/AccessDenied";
 import HomePage from "./pages/home";
 import TakeExam from "./components/exampage";
+import AdminExamDetails from "./components/AdminExamDetails";
 
 function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
         <Routes>
-          <Route path="/exampage" element={<TakeExam/>} />
-          <Route path="/" element={<HomePage/>} />
+          <Route path="/exampage" element={<TakeExam />} />
+          <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/access-denied" element={<AccessDenied />} />
@@ -39,6 +40,7 @@ function App() {
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
             <Route path="/admin/examquestions" element={<AdminExamQuestions />} />
             <Route path="/admin/users" element={<AdminUsers />} />
+            <Route path="/admin/exam/:id" element={<AdminExamDetails />} />
           </Route>
 
           <Route path="*" element={<AccessDenied />} />

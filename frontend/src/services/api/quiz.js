@@ -15,3 +15,8 @@ export const getExamDetails = async (examId) => {
   const response = await quizAxiosInstance.get(API_ENDPOINTS.GET_EXAM(examId));
   return response.data;
 };
+
+export const getAllExams = async () => {
+  const response = await quizAxiosInstance.get(API_ENDPOINTS.GET_ALL_EXAMS);
+  return response.data;
+};

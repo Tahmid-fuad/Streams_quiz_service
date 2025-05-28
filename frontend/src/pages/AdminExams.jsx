@@ -1,44 +1,74 @@
-import { useState, useContext } from "react";
+import { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import { createExam } from "../services/api/quiz";
+import { createExam, getAllExams } from "../services/api/quiz";
 import { AuthContext } from "../context/AuthContext";
 import Navbar from "../components/NavBar";
 import Footer from "../components/Footer";
 
-const upcomingExams = [
-  { id: 1, subject: "Math", date: "2025-06-10", time: "10:00 AM - 12:00 PM", duration: "2 hours" },
-  { id: 2, subject: "Science", date: "2025-06-12", time: "10:00 AM - 12:00 PM", duration: "2 hours" },
-  { id: 3, subject: "Geography", date: "2025-06-14", time: "11:00 AM - 1:00 PM", duration: "2 hours" },
-  { id: 4, subject: "Computer Science", date: "2025-06-15", time: "9:00 AM - 11:00 AM", duration: "2 hours" },
-  { id: 5, subject: "Economics", date: "2025-06-17", time: "1:00 PM - 3:00 PM", duration: "2 hours" },
-  { id: 6, subject: "Physical Education", date: "2025-06-18", time: "10:30 AM - 12:00 PM", duration: "1.5 hours" },
-];
-
-const ongoingExams = [
-  { id: 7, subject: "History", date: "2025-05-26", time: "9:00 AM - 11:00 AM", duration: "2 hours", status: "Ongoing" },
-  { id: 8, subject: "Biology", date: "2025-05-26", time: "11:00 AM - 1:00 PM", duration: "2 hours", status: "Ongoing" },
-  { id: 9, subject: "Chemistry", date: "2025-05-26", time: "2:00 PM - 4:00 PM", duration: "2 hours", status: "Ongoing" },
-  { id: 10, subject: "Environmental Science", date: "2025-05-26", time: "1:00 PM - 3:00 PM", duration: "2 hours", status: "Ongoing" },
-  { id: 11, subject: "Civics", date: "2025-05-26", time: "3:00 PM - 5:00 PM", duration: "2 hours", status: "Ongoing" },
-  { id: 12, subject: "Language Studies", date: "2025-05-26", time: "4:00 PM - 5:30 PM", duration: "1.5 hours", status: "Ongoing" },
-];
-
-const completedExams = [
-  { id: 13, subject: "English", date: "2025-05-20", time: "10:00 AM - 12:00 PM", duration: "2 hours", score: 88 },
-  { id: 14, subject: "Art", date: "2025-05-22", time: "1:00 PM - 2:30 PM", duration: "1.5 hours", score: 95 },
-  { id: 15, subject: "Physics", date: "2025-05-18", time: "9:00 AM - 11:00 AM", duration: "2 hours", score: 81 },
-  { id: 16, subject: "Sociology", date: "2025-05-19", time: "11:00 AM - 1:00 PM", duration: "2 hours", score: 73 },
-  { id: 17, subject: "Business Studies", date: "2025-05-21", time: "2:00 PM - 4:00 PM", duration: "2 hours", score: 66 },
-  { id: 18, subject: "Music", date: "2025-05-23", time: "9:30 AM - 11:00 AM", duration: "1.5 hours", score: 92 },
-];
-
 export default function Exams({ currentPage, setCurrentPage }) {
   const { user } = useContext(AuthContext);
   const [view, setView] = useState("upcoming");
+  const [exam, setExam] = useState({ subject: "", fullMarks: "", duration: "", startTime: "" });
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [exams, setExams] = useState([]);
   const navigate = useNavigate();
-  const [exam, setExam] = useState({ subject: "", fullMarks: "", duration: "", startTime: "" });
+
+  useEffect(() => {
+    const fetchExams = async () => {
+      try {
+        const data = await getAllExams();
+        setExams(data);
+      } catch (error) {
+        setErrorMessage("Error fetching exams: " + (error.response?.data?.message || error.message));
+      }
+    };
+    fetchExams();
+  }, []);
+
+  const categorizeExams = () => {
+    const now = new Date();
+    const upcoming = [];
+    const ongoing = [];
+    const completed = [];
+
+    exams.forEach((exam) => {
+      const start = new Date(exam.start_time);
+      const end = new Date(start.getTime() + exam.duration_minutes * 60 * 1000);
+
+      if (now < start) {
+        upcoming.push(exam);
+      } else if (now >= start && now <= end) {
+        ongoing.push(exam);
+      } else if (now > end) {
+        completed.push(exam);
+      }
+    });
+
+    return { upcoming, ongoing, completed };
+  };
+
+  const { upcoming, ongoing, completed } = categorizeExams();
+
+  const formatDate = (isoDate) => {
+    return new Date(isoDate).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "2-digit",
+    });
+  };
+
+  const formatTime = (isoDate, durationMinutes) => {
+    const start = new Date(isoDate);
+    const end = new Date(start.getTime() + durationMinutes * 60 * 1000);
+    return `${start.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })} - ${end.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}`;
+  };
+
+  const formatDuration = (minutes) => {
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    return hours > 0 ? `${hours} hour${hours > 1 ? "s" : ""} ${mins > 0 ? `${mins} min` : ""}` : `${mins} min`;
+  };
 
   const handleChange = (e) => {
     setExam({ ...exam, [e.target.name]: e.target.value });
@@ -91,16 +121,20 @@ export default function Exams({ currentPage, setCurrentPage }) {
           <section className="mb-12">
             <h3 className={sectionTitleStyle}>📅 Upcoming Exams</h3>
             <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-              {upcomingExams.map((exam) => (
-                <div key={exam.id} className={cardStyle}>
-                  <h4 className="text-xl font-bold text-indigo-700 mb-2">{exam.subject}</h4>
+              {upcoming.map((exam) => (
+                <div key={exam._id} className={cardStyle}>
+                  <h4 className="text-xl font-bold text-indigo-700 mb-2">{exam.title}</h4>
                   <div className="text-sm text-gray-700 space-y-1 mb-4">
-                    <p><strong>📆 Date:</strong> {exam.date}</p>
-                    <p><strong>🕒 Time:</strong> {exam.time}</p>
-                    <p><strong>⏱️ Duration:</strong> {exam.duration}</p>
+                    <p><strong>📆 Date:</strong> {formatDate(exam.start_time)}</p>
+                    <p><strong>🕒 Time:</strong> {formatTime(exam.start_time, exam.duration_minutes)}</p>
+                    <p><strong>⏱️ Duration:</strong> {formatDuration(exam.duration_minutes)}</p>
+                    <p><strong>📊 Total Marks:</strong> {exam.total_score}</p>
                   </div>
-                  <button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-lg transition font-semibold">
-                    Book a Seat
+                  <button
+                    onClick={() => navigate(`/admin/exam/${exam._id}`)}
+                    className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-lg transition font-semibold"
+                  >
+                    View Exam
                   </button>
                 </div>
               ))}
@@ -112,17 +146,21 @@ export default function Exams({ currentPage, setCurrentPage }) {
           <section className="mb-12">
             <h3 className={sectionTitleStyle}>🟢 Ongoing Exams</h3>
             <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-              {ongoingExams.map((exam) => (
-                <div key={exam.id} className={cardStyle}>
-                  <h4 className="text-xl font-bold text-indigo-700 mb-2">{exam.subject}</h4>
+              {ongoing.map((exam) => (
+                <div key={exam._id} className={cardStyle}>
+                  <h4 className="text-xl font-bold text-indigo-700 mb-2">{exam.title}</h4>
                   <div className="text-sm text-gray-700 space-y-1 mb-4">
-                    <p><strong>📆 Date:</strong> {exam.date}</p>
-                    <p><strong>🕒 Time:</strong> {exam.time}</p>
-                    <p><strong>⏱️ Duration:</strong> {exam.duration}</p>
+                    <p><strong>📆 Date:</strong> {formatDate(exam.start_time)}</p>
+                    <p><strong>🕒 Time:</strong> {formatTime(exam.start_time, exam.duration_minutes)}</p>
+                    <p><strong>⏱️ Duration:</strong> {formatDuration(exam.duration_minutes)}</p>
+                    <p><strong>📊 Total Marks:</strong> {exam.total_score}</p>
                     <p className="text-green-600 font-medium">🟢 Live Now</p>
                   </div>
-                  <button className="w-full bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg transition font-semibold">
-                    Start Exam
+                  <button
+                    onClick={() => navigate(`/admin/exam/${exam._id}`)}
+                    className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-lg transition font-semibold"
+                  >
+                    View Exam
                   </button>
                 </div>
               ))}
@@ -134,23 +172,20 @@ export default function Exams({ currentPage, setCurrentPage }) {
           <section className="mb-12">
             <h3 className={sectionTitleStyle}>✅ Completed Exams</h3>
             <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-              {completedExams.map((exam) => (
-                <div key={exam.id} className={cardStyle}>
-                  <h4 className="text-xl font-bold text-indigo-700 mb-2">{exam.subject}</h4>
-                  <div className="text-sm text-gray-700 space-y-1">
-                    <p><strong>📆 Date:</strong> {exam.date}</p>
-                    <p><strong>🕒 Time:</strong> {exam.time}</p>
-                    <p><strong>⏱️ Duration:</strong> {exam.duration}</p>
-                    <p className="flex items-center gap-2">
-                      <strong>🏁 Score:</strong>
-                      <span className={`inline-block text-sm font-bold px-3 py-1 rounded-full ${exam.score >= 90 ? "bg-green-100 text-green-800" : exam.score >= 70 ? "bg-yellow-100 text-yellow-800" : "bg-red-100 text-red-800"}`}>
-                        {exam.score}%
-                      </span>
-                    </p>
-                    <div className="w-full bg-gray-200 rounded-full h-2.5 mt-2">
-                      <div className={`h-2.5 rounded-full ${exam.score >= 90 ? "bg-green-500" : exam.score >= 70 ? "bg-yellow-500" : "bg-red-500"}`} style={{ width: `${exam.score}%` }}></div>
-                    </div>
+              {completed.map((exam) => (
+                <div key={exam._id} className={cardStyle}>
+                  <h4 className="text-xl font-bold text-indigo-700 mb-2">{exam.title}</h4>
+                  <div className="text-sm text-gray-700 space-y-1 mb-4">
+                    <p><strong>📆 Date:</strong> {formatDate(exam.start_time)}</p>
+                    <p><strong>🕒 Time:</strong> {formatTime(exam.start_time, exam.duration_minutes)}</p>
+                    <p><strong>⏱️ Duration:</strong> {formatDuration(exam.duration_minutes)}</p>
+                    <p><strong>📊 Total Marks:</strong> {exam.total_score}</p>
                   </div>
+                  <button
+                    onClick={() => navigate(`/admin/exam/${exam._id}`)}
+                    className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-lg transition font-semibold">
+                    View Exam
+                  </button>
                 </div>
               ))}
             </div>
