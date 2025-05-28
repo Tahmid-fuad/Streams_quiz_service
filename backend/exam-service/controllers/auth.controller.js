@@ -14,10 +14,15 @@ const register = async (req, res) => {
 
     // Hash the password and create a new user
     const hashedPassword = await bcrypt.hash(password, 10);
+
+    // generate OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
     const user = new User({
       name,
       email,
       password: hashedPassword,
+      otp,
     });
     await user.save();
     res.status(201).send("Success! User Registered.");
@@ -58,6 +63,37 @@ const login = async (req, res) => {
 const forgotPassword = async (req, res) => {};
 
 const resetPassword = async (req, res) => {};
+
+const sendOTP = async (req, res) => {
+  const { email } = req.body;
+  try {
+    // Check if the email is valid
+    if (!email || !email.includes("@")) {
+      return res.status(400).send("Invalid email address");
+    }
+
+    // Generate OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+  } catch (error) {
+    res.status(500).send("Error sending OTP");
+  }
+};
+
+const verifyEmail = async (req, res) => {
+  const { email, otp } = req.body;
+  try {
+    // Check if the email and OTP are valid
+    if (!email || !otp) {
+      return res.status(400).send("Email and OTP are required");
+    }
+
+    // Verify OTP logic here (e.g., check against a database or cache)
+    // For now, we will assume OTP verification is successful
+    res.status(200).send("Email verified successfully");
+  } catch (error) {
+    res.status(500).send("Error verifying email");
+  }
+};
 
 export { login, register, forgotPassword, resetPassword };
 export default { login, register, forgotPassword, resetPassword };

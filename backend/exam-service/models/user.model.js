@@ -15,11 +15,27 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    otp: {
+      value: {
+        type: String,
+        default: null,
+      },
+      expiresIn: {
+        type: Date,
+        default: null,
+      },
+    },
     role: {
       type: String,
       enum: ["student", "admin"],
       default: "student",
     },
+    submissionIds: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Submission",
+      },
+    ],
   },
   { timestamps: true }
 );
