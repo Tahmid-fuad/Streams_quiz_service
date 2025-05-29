@@ -5,7 +5,7 @@ import authRoutes from "./auth.route.js";
 import examAdminRoutes from "./exam.admin.route.js";
 import examRoutes from "./exam.route.js";
 
-import { isAuthenticated } from "../middleware/auth.middleware.js";
+import { isAuthenticated, isAdmin } from "../middleware/auth.middleware.js";
 
 const router = express.Router();
 
@@ -13,7 +13,7 @@ const router = express.Router();
 router.use("/api/auth", authRoutes);
 
 // => Exam routes
-router.use("/api/admin/exams", isAuthenticated, examAdminRoutes);
+router.use("/api/admin/exams", examAdminRoutes);
 router.use("/api/exams", examRoutes);
 
 // => Base Route

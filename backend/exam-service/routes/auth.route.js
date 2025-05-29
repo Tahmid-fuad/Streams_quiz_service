@@ -17,12 +17,12 @@ router.get("/users", isAuthenticated, authController.getAllUsers);
 router.put("/profile", authController.updateUserProfile);
 
 // Delete user
-router.delete("/:id", authController.deleteUser);
+router.delete("/:id", isAuthenticated, authController.deleteUser);
 
 //forgot password
 router.post("/forgot-password", authController.forgotPassword);
 
 // reset password
-router.post("/change-password", authController.changePassword);
+router.post("/change-password", isAuthenticated, authController.changePassword);
 
 export default router;
