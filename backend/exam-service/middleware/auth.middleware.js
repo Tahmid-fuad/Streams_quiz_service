@@ -5,8 +5,8 @@ import jwt from "jsonwebtoken";
 export const isAuthenticated = async (req, res, next) => {
   if (req.user) {
     try {
-      req.user = await User.findById(decoded._id).select("-password");
-      if (!req.user) {
+      const user = await User.findById(req.user._id).select("-password");
+      if (!user) {
         return res
           .status(404)
           .json({ message: "Unauthorized Access Request, User not found" });
@@ -25,7 +25,7 @@ export const isAuthenticated = async (req, res, next) => {
 };
 
 export const isAdmin = (req, res, next) => {
-  if (req.admin && req.admin.role === "admin") {
+  if (req.user && req.user.role === "admin") {
     next();
   } else {
     res
