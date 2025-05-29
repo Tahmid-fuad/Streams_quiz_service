@@ -16,6 +16,14 @@ const quizAxiosInstance = axios.create({
   },
 });
 
+const submissionAxiosInstance = axios.create({
+  baseURL: import.meta.env.VITE_SUBMISSION_API_URL,
+  timeout: 5000,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
 authAxiosInstance.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
@@ -38,4 +46,15 @@ quizAxiosInstance.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-export { authAxiosInstance, quizAxiosInstance };
+submissionAxiosInstance.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+export { authAxiosInstance, quizAxiosInstance, submissionAxiosInstance };
