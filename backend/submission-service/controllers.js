@@ -6,7 +6,7 @@ const submitExam = async (req, res) => {
   const examId = req.params.examId;
 
   try {
-    const { answers, user_id } = req.body;
+    const { answers, user_id, start_time } = req.body;
     if (!user_id || !examId || !answers) {
       return res.status(400).json({ message: "Missing required fields" });
     }
@@ -54,6 +54,7 @@ const submitExam = async (req, res) => {
     const submission = new Submission({
       user_id,
       exam_id: examId,
+      start_time,
       answers: enrichedAnswers,
       totalScore,
       submitted_at,

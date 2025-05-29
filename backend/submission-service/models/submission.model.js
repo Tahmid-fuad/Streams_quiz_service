@@ -23,6 +23,10 @@ const submissionSchema = new mongoose.Schema(
       ref: "Exam",
       required: true,
     },
+    start_time: {
+      type: Date,
+      required: true,
+    },
     answers: [answerSchema],
     totalScore: Number,
     submitted_at: {
