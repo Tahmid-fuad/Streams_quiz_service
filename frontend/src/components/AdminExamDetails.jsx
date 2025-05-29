@@ -328,7 +328,7 @@ export default function AdminExamDetails() {
                                         <input
                                             type="text"
                                             name="question_text"
-                                            value={editQuestion.question_text}
+                                            value={editQuestion?.question_text || ""}
                                             onChange={(e) => handleEditChange(e)}
                                             required
                                             className="w-full border rounded px-3 py-2"
@@ -340,7 +340,7 @@ export default function AdminExamDetails() {
                                             <input
                                                 type="text"
                                                 name="options"
-                                                value={editQuestion.options[index]}
+                                                value={editQuestion?.options?.[index] || ""}
                                                 onChange={(e) => handleEditChange(e, index)}
                                                 required
                                                 className="w-full border rounded px-3 py-2"
@@ -351,16 +351,18 @@ export default function AdminExamDetails() {
                                         <label className="block font-medium mb-1">Correct Option</label>
                                         <select
                                             name="correctOption"
-                                            value={editQuestion.correctOption}
+                                            value={editQuestion?.correctOption || ""}
                                             onChange={(e) => handleEditChange(e)}
                                             required
                                             className="w-full border rounded px-3 py-2"
                                         >
                                             <option value="">Select correct option</option>
-                                            {editQuestion.options.map((opt, index) => (
-                                                <option key={index} value={String.fromCharCode(65 + index)}>
-                                                    {String.fromCharCode(65 + index)}
-                                                </option>
+                                            {editQuestion?.options?.map((opt, index) => (
+                                                opt ? (
+                                                    <option key={index} value={opt}>
+                                                        {String.fromCharCode(65 + index)}. {opt}
+                                                    </option>
+                                                ) : null
                                             ))}
                                         </select>
                                     </div>
@@ -369,7 +371,7 @@ export default function AdminExamDetails() {
                                         <input
                                             type="number"
                                             name="score"
-                                            value={editQuestion.score}
+                                            value={editQuestion?.score || ""}
                                             onChange={(e) => handleEditChange(e)}
                                             required
                                             className="w-full border rounded px-3 py-2"
