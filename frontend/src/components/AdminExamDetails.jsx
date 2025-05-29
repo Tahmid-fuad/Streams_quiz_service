@@ -46,13 +46,14 @@ export default function AdminExamDetails() {
         });
     };
 
-    const handleQuestionChange = (e, index) => {
+    const handleQuestionChange = (e, index = null) => {
         const { name, value } = e.target;
-        if (name === "options") {
+        if (name === "options" && index !== null) {
             const updatedOptions = [...newQuestion.options];
             updatedOptions[index] = value;
             setNewQuestion({ ...newQuestion, options: updatedOptions });
         } else {
+            console.log(`Updating ${name} to:`, value); // Debug log
             setNewQuestion({ ...newQuestion, [name]: value });
         }
     };
@@ -73,11 +74,19 @@ export default function AdminExamDetails() {
             return;
         }
         try {
+            console.log("New Question State:", JSON.stringify(newQuestion, null, 2)); // Debug form state
             const questionData = {
-                questions: [{ ...newQuestion, score: Number(newQuestion.score) }],
+                questions: [{
+                    question_text: newQuestion.question_text,
+                    options: newQuestion.options,
+                    correctOption: newQuestion.correctOption, // Full option text (e.g., "2")
+                    score: Number(newQuestion.score),
+                }],
             };
+            console.log("Adding Question Data:", JSON.stringify(questionData, null, 2)); // Debug submission
             await addQuestionsToExam(id, questionData);
-            const updatedExam = await getExamDetails(id); // Refetch to sync
+            const updatedExam = await getExamDetails(id);
+            console.log("Updated Exam Data:", JSON.stringify(updatedExam, null, 2)); // Debug response
             setExam(updatedExam);
             setNewQuestion({
                 question_text: "",
@@ -89,6 +98,7 @@ export default function AdminExamDetails() {
             setErrorMessage("");
         } catch (error) {
             setErrorMessage("Error adding question: " + (error.response?.data?.message || error.message));
+            console.error("Add Question Error:", error);
         }
     };
 
@@ -222,8 +232,8 @@ export default function AdminExamDetails() {
                                 >
                                     <option value="">Select correct option</option>
                                     {newQuestion.options.map((opt, index) => (
-                                        <option key={index} value={String.fromCharCode(65 + index)}>
-                                            {String.fromCharCode(65 + index)}
+                                        <option key={index} value={opt}>
+                                            {String.fromCharCode(65 + index)}. {opt}
                                         </option>
                                     ))}
                                 </select>
@@ -358,11 +368,9 @@ export default function AdminExamDetails() {
                                         >
                                             <option value="">Select correct option</option>
                                             {editQuestion?.options?.map((opt, index) => (
-                                                opt ? (
-                                                    <option key={index} value={opt}>
-                                                        {String.fromCharCode(65 + index)}. {opt}
-                                                    </option>
-                                                ) : null
+                                                <option key={index} value={opt}>
+                                                    {String.fromCharCode(65 + index)}. {opt}
+                                                </option>
                                             ))}
                                         </select>
                                     </div>
