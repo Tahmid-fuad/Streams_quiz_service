@@ -1,0 +1,24 @@
+version: '3.8'
+services:
+  submission-service:
+    build: ./backend/submission-service
+    ports:
+      - "4000:4000"
+    env_file:
+      - submission.env
+  exam-service:
+    build: ./backend/exam-service
+    ports:
+      - "4001:4001"
+    env_file:
+      - exam.env
+  auth-service:
+    build: ./backend/auth-service
+    ports:
+      - "4002:4002"
+    env_file:
+      - auth.env
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:80"

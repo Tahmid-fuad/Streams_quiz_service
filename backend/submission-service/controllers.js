@@ -1,12 +1,17 @@
 const Submission = require("./models/submission.model");
 const axios = require("axios");
+const jwt=require("jsonwebtoken")
 
 // POST /api/submissions
 const submitExam = async (req, res) => {
   const examId = req.params.examId;
 
   try {
-    const { answers, user_id, start_time } = req.body;
+    const { answers, start_time } = req.body;
+    const token = req.headers.authorization.split(" ")[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    user_id=decoded.id
+    
     if (!user_id || !examId || !answers) {
       return res.status(400).json({ message: "Missing required fields" });
     }
@@ -16,7 +21,6 @@ const submitExam = async (req, res) => {
     const { data: questions } = await axios.get(
       `${examServiceUrl}/${examId}`
     );
-    console.log(questions);
 
     if (!questions) {
       return res.status(404).json({ message: "Exam not found" });

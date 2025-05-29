@@ -6,11 +6,9 @@ const app = express();
 const dotenv = require("dotenv");
 dotenv.config();
 
-const FRONT_END= process.env.FRONT_END_URL
-
 // Enable CORS for frontend at http://localhost:5173
 app.use(cors({
-  origin: `http://localhost:${FRONT_END}`,
+  origin: process.env.CORS_ORIGIN,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'], 
   allowedHeaders: ['Content-Type', 'Authorization'], 
   credentials: true 
