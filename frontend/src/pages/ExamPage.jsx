@@ -1,65 +1,60 @@
 import { useState, useEffect, useRef } from "react";
+import { useParams } from "react-router-dom";
 import Navbar from "../components/NavBar";
 import Footer from "../components/Footer";
 import { motion } from "framer-motion";
+import { getStudentExamDetails } from "./../services/api/quiz";
 
-const sampleExam = {
-  subject: "Mathematics",
-  duration: 5, // minutes
-  questions: [
-    {
-      id: 1,
-      question: "What is 2 + 2?",
-      options: ["1", "2", "3", "4"],
-      answer: 3,
-    },
-    {
-      id: 2,
-      question: "What is 10 / 2?",
-      options: ["2", "5", "10", "20"],
-      answer: 1,
-    },
-    {
-      id: 3,
-      question: "What is 5 * 6?",
-      options: ["11", "30", "35", "25"],
-      answer: 1,
-    },
-  ],
-};
-
-export default function TakeExam() {
+export default function ExamPage() {
+  const { examId } = useParams();
+  const [exam, setExam] = useState(null);
   const [answers, setAnswers] = useState({});
-  const [timeLeft, setTimeLeft] = useState(sampleExam.duration * 60);
+  const [timeLeft, setTimeLeft] = useState(null);
   const [examFinished, setExamFinished] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const timerRef = useRef(null);
 
   useEffect(() => {
-    if (timeLeft <= 0) {
+    const fetchExam = async () => {
+      try {
+        setLoading(true);
+        const response = await getStudentExamDetails(examId);
+        setExam(response);
+        setTimeLeft(response.duration_minutes * 60); // Convert minutes to seconds
+        setError(null);
+      } catch (err) {
+        setError("Failed to fetch exam. Please try again later.");
+        console.error("Error fetching exam:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchExam();
+  }, [examId]);
+
+  useEffect(() => {
+    if (timeLeft <= 0 && !examFinished) {
       finishExam();
       return;
     }
-    timerRef.current = setTimeout(() => {
-      setTimeLeft(timeLeft - 1);
-    }, 1000);
+    if (!examFinished && timeLeft !== null) {
+      timerRef.current = setTimeout(() => {
+        setTimeLeft(timeLeft - 1);
+      }, 1000);
+    }
     return () => clearTimeout(timerRef.current);
-  }, [timeLeft]);
+  }, [timeLeft, examFinished]);
 
   const finishExam = () => {
-    setExamFinished(true);
+    setExamFinished(false);
     clearTimeout(timerRef.current);
+    // TODO: Implement submission API call here later
   };
 
-  const handleOptionSelect = (qIndex, optionIndex) => {
-    setAnswers({ ...answers, [qIndex]: optionIndex });
-  };
-
-  const calculateScore = () => {
-    let score = 0;
-    sampleExam.questions.forEach((q, idx) => {
-      if (answers[idx] === q.answer) score++;
-    });
-    return score;
+  const handleOptionSelect = (questionId, optionIndex) => {
+    setAnswers({ ...answers, [questionId]: optionIndex });
   };
 
   const formatTime = (seconds) => {
@@ -68,8 +63,26 @@ export default function TakeExam() {
     return `${m}:${s}`;
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-600"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+          <strong className="font-bold">Error! </strong>
+          <span className="block sm:inline">{error}</span>
+        </div>
+      </div>
+    );
+  }
+
   if (examFinished) {
-    const score = calculateScore();
     return (
       <div className="min-h-screen bg-gray-100 flex flex-col">
         <Navbar />
@@ -81,16 +94,13 @@ export default function TakeExam() {
         >
           <h1 className="text-3xl font-bold text-indigo-700 mb-4">Exam Completed!</h1>
           <p className="text-xl mb-6">
-            Your score:{" "}
-            <span className="font-semibold text-yellow-600">
-              {score} / {sampleExam.questions.length}
-            </span>
+            Your answers have been submitted. Results will be available soon.
           </p>
           <button
             onClick={() => window.location.reload()}
             className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg transition"
           >
-            Take Again
+            Back to Exams
           </button>
         </motion.main>
         <Footer />
@@ -109,7 +119,7 @@ export default function TakeExam() {
       >
         {/* Header */}
         <header className="flex justify-between items-center mb-6 bg-white rounded shadow p-4">
-          <h2 className="text-2xl font-bold text-indigo-700">{sampleExam.subject}</h2>
+          <h2 className="text-2xl font-bold text-indigo-700">{exam.title}</h2>
           <div className="text-yellow-600 font-mono font-bold text-xl bg-yellow-100 px-4 py-2 rounded shadow">
             Time Left: {formatTime(timeLeft)}
           </div>
@@ -117,18 +127,18 @@ export default function TakeExam() {
 
         {/* Questions List */}
         <div className="space-y-8 bg-white p-6 rounded-lg shadow">
-          {sampleExam.questions.map((question, idx) => {
-            const selectedOption = answers[idx];
+          {exam.questionIds.map((question, idx) => {
+            const selectedOption = answers[question._id];
             return (
               <motion.div
-                key={question.id}
+                key={question._id}
                 initial={{ opacity: 0, x: 30 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.5, delay: idx * 0.1 }}
                 className="border-b border-gray-200 pb-4"
               >
                 <p className="text-lg font-semibold mb-3">
-                  Q{idx + 1}. {question.question}
+                  Q{idx + 1}. {question.question_text}
                 </p>
                 <div className="space-y-3">
                   {question.options.map((opt, optIdx) => (
@@ -143,9 +153,9 @@ export default function TakeExam() {
                     >
                       <input
                         type="radio"
-                        name={`question-${question.id}`}
+                        name={`question-${question._id}`}
                         checked={selectedOption === optIdx}
-                        onChange={() => handleOptionSelect(idx, optIdx)}
+                        onChange={() => handleOptionSelect(question._id, optIdx)}
                         className="form-radio text-yellow-500"
                       />
                       <span className="text-gray-800">{opt}</span>
@@ -159,7 +169,7 @@ export default function TakeExam() {
 
         {/* Answered Count */}
         <div className="mb-4 text-center text-gray-700 font-medium">
-          Answered {Object.keys(answers).length} / {sampleExam.questions.length} questions
+          Answered {Object.keys(answers).length} / {exam.questionIds.length} questions
         </div>
 
         {/* Submit Button */}

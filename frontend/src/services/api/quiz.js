@@ -40,3 +40,13 @@ export const deleteQuestion = async (examId, questionId) => {
   const response = await quizAxiosInstance.delete(API_ENDPOINTS.DELETE_QUESTION(examId, questionId));
   return response.data;
 };
+
+export const getAllStudentExams = async () => {
+  const response = await quizAxiosInstance.get(API_ENDPOINTS.GET_ALL_STUDENT_EXAMS);
+  return response.data;
+};
+
+export const getStudentExamDetails = async (examId) => {
+  const response = await quizAxiosInstance.get(API_ENDPOINTS.GET_STUDENT_EXAM(examId));
+  return response.data;
+};
