@@ -1,22 +1,41 @@
-const express = require('express');
-const app = express();
-const port = process.env.PORT || 3002; // Using 3002 to avoid conflict with other services
+const express = require("express");
+const dotenv = require("dotenv");
+const cors = require("cors");
+const morgan = require("morgan");
+const connectDB = require("./db");
+const submissionUserRoutes = require("./routes/user.routes");
+const submissionAdminRoutes = require("./routes/admin.routes");
 
-// Middleware for parsing JSON and urlencoded form data
+
+const app = express();
+dotenv.config();
+
+connectDB();
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(morgan("combined"));
+app.use(cors({
+  origin: process.env.CORS_ORIGIN,
+  methods: ["GET", "POST", "PUT", "DELETE"],
+}));
 
-// Simple health check route
-app.get('/health', (req, res) => {
-  res.status(200).json({ status: 'ok', service: 'submission-service' });
+// Root and health check
+app.get("/", (req, res) => {
+  res.send("Submission Service is running");
 });
 
-// Root route
-app.get('/', (req, res) => {
-  res.send('Submission Service is running');
+
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "ok", service: "submission-service" });
 });
 
-// Start the server
-app.listen(port, () => {
-  console.log(`Submission service listening on port ${port}`);
+
+app.use("/api/submissions", submissionUserRoutes);
+app.use("/api/admin/submissions", submissionAdminRoutes);
+
+
+const PORT = process.env.PORT ;
+app.listen(PORT, () => {
+  console.log(📦 Submission Service running at http://localhost:${PORT});
 });
