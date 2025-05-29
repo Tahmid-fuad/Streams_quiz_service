@@ -16,4 +16,7 @@ export const API_ENDPOINTS = {
   DELETE_EXAM: (examId) => `/admin/exams/${examId}`,
   UPDATE_QUESTION: (examId, questionId) => `/admin/exams/${examId}/questions/${questionId}`,
   DELETE_QUESTION: (examId, questionId) => `/admin/exams/${examId}/questions/${questionId}`,
+
+  GET_ALL_STUDENT_EXAMS: "/exams",
+  GET_STUDENT_EXAM: (examId) => `/exams/${examId}`,
 };
