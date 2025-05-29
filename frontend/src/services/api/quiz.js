@@ -50,3 +50,4 @@ export const getStudentExamDetails = async (examId) => {
   const response = await quizAxiosInstance.get(API_ENDPOINTS.GET_STUDENT_EXAM(examId));
   return response.data;
 };
+

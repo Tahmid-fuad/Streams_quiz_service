@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Navbar from "../components/NavBar";
 import Footer from "../components/Footer";
 import { format } from "date-fns";
-import { getAllStudentExams } from "./../services/api/quiz";
+import { getAllStudentExams } from "../services/api/quiz";
 
 export default function Exams({ currentPage, setCurrentPage }) {
   const [view, setView] = useState("upcoming");

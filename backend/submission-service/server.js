@@ -37,5 +37,5 @@ app.use("/api/admin/submissions", submissionAdminRoutes);
 
 const PORT = process.env.PORT ;
 app.listen(PORT, () => {
-  console.log(`📦 Submission Service running at http://localhost:${PORT}`);
+  console.log(📦 Submission Service running at http://localhost:${PORT});
 });

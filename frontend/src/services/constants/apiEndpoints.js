@@ -19,4 +19,6 @@ export const API_ENDPOINTS = {
 
   GET_ALL_STUDENT_EXAMS: "/exams",
   GET_STUDENT_EXAM: (examId) => `/exams/${examId}`,
+
+  SUBMIT_EXAM: (examId) => `/submissions/${examId}`,
 };
