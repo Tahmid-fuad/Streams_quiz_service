@@ -12,4 +12,8 @@ export const API_ENDPOINTS = {
   ADD_QUESTIONS: (examId) => `/admin/exams/${examId}/questions/bulk`,
   GET_EXAM: (examId) => `/admin/exams/${examId}`,
   GET_ALL_EXAMS: "/admin/exams",
+  UPDATE_EXAM: (examId) => `/admin/exams/${examId}`,
+  DELETE_EXAM: (examId) => `/admin/exams/${examId}`,
+  UPDATE_QUESTION: (examId, questionId) => `/admin/exams/${examId}/questions/${questionId}`,
+  DELETE_QUESTION: (examId, questionId) => `/admin/exams/${examId}/questions/${questionId}`,
 };
