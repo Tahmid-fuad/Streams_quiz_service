@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Navbar from "../components/NavBar";
 import Footer from "../components/Footer";
 import { format } from "date-fns";
-import { getAllStudentExams } from "../services/api/quiz";
+import { getAllStudentExams } from "./../services/api/quiz";
 
 export default function Exams({ currentPage, setCurrentPage }) {
   const [view, setView] = useState("upcoming");
@@ -100,10 +100,7 @@ export default function Exams({ currentPage, setCurrentPage }) {
           ) : (
             <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
               {filteredExams.map((exam) => (
-                <div
-                  key={exam._id}
-                  className="p-6 bg-white rounded-2xl border border-indigo-100 shadow-md hover:shadow-xl transition transform hover:-translate-y-1"
-                >
+                <div key={exam._id} className={cardStyle}>
                   <h4 className="text-xl font-bold text-indigo-700 mb-1">{exam.title}</h4>
                   <p className="text-gray-600 mb-2 italic">{exam.description}</p>
                   <div className="text-sm text-gray-700 space-y-1 mb-4">
@@ -127,6 +124,9 @@ export default function Exams({ currentPage, setCurrentPage }) {
                     </p>
                     <p>
                       <strong>📝 Questions:</strong> {exam.questionIds.length}
+                    </p>
+                    <p>
+                      <strong>🏆 Total Score:</strong> {exam.total_score}
                     </p>
                     {view === "ongoing" && (
                       <p className="text-green-600 font-medium">🟢 Live Now</p>
