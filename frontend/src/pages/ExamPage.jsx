@@ -17,21 +17,13 @@ export default function ExamPage() {
   const [error, setError] = useState(null);
   const [timerStarted, setTimerStarted] = useState(false);
   const timerRef = useRef(null);
-  const { user } = useContext(AuthContext);
+  const { user, loading: userLoading } = useContext(AuthContext);
   const [submissionResult, setSubmissionResult] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [startTime] = useState(() => new Date().toISOString());
 
   useEffect(() => {
-    // Check if exam was already submitted
-    const storedResult = localStorage.getItem(`submissionResult_${examId}`);
-    if (storedResult) {
-      setSubmissionResult(JSON.parse(storedResult));
-      setExamFinished(true);
-      setLoading(false);
-      return;
-    }
-
+    // Remove localStorage logic: always fetch exam and use in-memory state
     const fetchExam = async () => {
       try {
         setLoading(true);
@@ -40,8 +32,6 @@ export default function ExamPage() {
         const timeInSeconds = response.duration_minutes * 60;
         setTimeLeft(timeInSeconds);
         setError(null);
-        
-        // Only start timer after a brief delay to ensure component is ready
         setTimeout(() => {
           setTimerStarted(true);
         }, 100);
@@ -52,7 +42,6 @@ export default function ExamPage() {
         setLoading(false);
       }
     };
-
     fetchExam();
   }, [examId]);
 
@@ -61,24 +50,15 @@ export default function ExamPage() {
     if (!timerStarted || examFinished || timeLeft === null) {
       return;
     }
-
-    // Check if exam was already submitted (additional safety check)
-    const storedResult = localStorage.getItem(`submissionResult_${examId}`);
-    if (storedResult) {
-      return;
-    }
-
     // Auto-submit when time runs out
     if (timeLeft <= 0) {
       finishExam();
       return;
     }
-
     // Continue countdown
     timerRef.current = setTimeout(() => {
       setTimeLeft(prev => prev - 1);
     }, 1000);
-
     return () => {
       if (timerRef.current) {
         clearTimeout(timerRef.current);
@@ -87,18 +67,14 @@ export default function ExamPage() {
   }, [timeLeft, examFinished, timerStarted, examId]);
 
   const finishExam = async () => {
-    // Prevent multiple submissions
+    // Prevent multiple submissions or missing user
     if (submitting || examFinished) {
       return;
     }
-
     setSubmitting(true);
-    
-    // Clear any running timer
     if (timerRef.current) {
       clearTimeout(timerRef.current);
     }
-
     try {
       // Prepare answers in API format
       const formattedAnswers = Object.entries(answers).map(([questionId, selectedIndex]) => {
@@ -110,14 +86,12 @@ export default function ExamPage() {
         };
       });
       const payload = {
-        user_id: user?.id,
         answers: formattedAnswers,
         start_time: startTime,
       };
       const result = await submitExam(examId, payload);
       setSubmissionResult(result);
       setExamFinished(true);
-      localStorage.setItem(`submissionResult_${examId}`, JSON.stringify(result));
     } catch (err) {
       setError("Failed to submit exam. Please try again later.");
       console.error("Error submitting exam:", err);
@@ -143,11 +117,11 @@ export default function ExamPage() {
   };
 
   const handleBackToExams = () => {
-    localStorage.removeItem(`submissionResult_${examId}`);
+    // Just reload the page or navigate away, no localStorage cleanup needed
     window.location.reload();
   };
 
-  if (loading) {
+  if (loading || userLoading || !user) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-600"></div>
