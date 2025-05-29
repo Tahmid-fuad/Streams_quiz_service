@@ -15,7 +15,7 @@ import AdminExamQuestions from "./pages/AdminExamQuestion";
 import AccessDenied from "./pages/AccessDenied";
 import HomePage from "./pages/home";
 import AdminExamDetails from "./components/AdminExamDetails";
-import TakeExam from "./pages/ExamPage";
+import TakeExam from "./pages/exampage";
 
 function App() {
   return (

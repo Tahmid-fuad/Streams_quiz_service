@@ -8,7 +8,7 @@ import Footer from "../components/Footer";
 export default function Exams({ currentPage, setCurrentPage }) {
   const { user } = useContext(AuthContext);
   const [view, setView] = useState("upcoming");
-  const [exam, setExam] = useState({ subject: "", duration: "", startTime: "" });
+  const [exam, setExam] = useState({ subject: "", description: "", duration: "", startTime: "" });
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [exams, setExams] = useState([]);
@@ -91,7 +91,7 @@ export default function Exams({ currentPage, setCurrentPage }) {
     try {
       const examData = {
         title: exam.subject,
-        description: exam.subject,
+        description: exam.description,
         duration_minutes: Number(exam.duration),
         start_time: exam.startTime ? new Date(exam.startTime).toISOString() : undefined,
         total_score: 0,
@@ -112,6 +112,7 @@ export default function Exams({ currentPage, setCurrentPage }) {
     try {
       const examData = {
         title: editExam.title,
+        description: editExam.description,
         duration_minutes: Number(editExam.duration_minutes),
         start_time: new Date(editExam.start_time).toISOString(),
       };
@@ -136,12 +137,13 @@ export default function Exams({ currentPage, setCurrentPage }) {
     setEditExam({
       _id: exam._id,
       title: exam.title,
+      description: exam.description,
       duration_minutes: exam.duration_minutes,
       start_time: localStartTime,
     });
     setShowEditModal(true);
   };
-  
+
   const sectionTitleStyle = "text-2xl font-bold mb-6 text-indigo-800 flex items-center gap-2";
   const cardStyle = "p-6 bg-white rounded-2xl border border-indigo-100 shadow-md hover:shadow-xl transition transform hover:-translate-y-1";
 
@@ -168,6 +170,7 @@ export default function Exams({ currentPage, setCurrentPage }) {
               {upcoming.map((exam) => (
                 <div key={exam._id} className={cardStyle}>
                   <h4 className="text-xl font-bold text-indigo-700 mb-2">{exam.title}</h4>
+                  <p className="text-gray-600 mb-2 italic">{exam.description}</p>
                   <div className="text-sm text-gray-700 space-y-1 mb-4">
                     <p><strong>📆 Date:</strong> {formatDate(exam.start_time)}</p>
                     <p><strong>🕒 Time:</strong> {formatTime(exam.start_time, exam.duration_minutes)}</p>
@@ -207,6 +210,7 @@ export default function Exams({ currentPage, setCurrentPage }) {
               {ongoing.map((exam) => (
                 <div key={exam._id} className={cardStyle}>
                   <h4 className="text-xl font-bold text-indigo-700 mb-2">{exam.title}</h4>
+                  <p className="text-gray-600 mb-2 italic">{exam.description}</p>
                   <div className="text-sm text-gray-700 space-y-1 mb-4">
                     <p><strong>📆 Date:</strong> {formatDate(exam.start_time)}</p>
                     <p><strong>🕒 Time:</strong> {formatTime(exam.start_time, exam.duration_minutes)}</p>
@@ -247,6 +251,7 @@ export default function Exams({ currentPage, setCurrentPage }) {
               {completed.map((exam) => (
                 <div key={exam._id} className={cardStyle}>
                   <h4 className="text-xl font-bold text-indigo-700 mb-2">{exam.title}</h4>
+                  <p className="text-gray-600 mb-2 italic">{exam.description}</p>
                   <div className="text-sm text-gray-700 space-y-1 mb-4">
                     <p><strong>📆 Date:</strong> {formatDate(exam.start_time)}</p>
                     <p><strong>🕒 Time:</strong> {formatTime(exam.start_time, exam.duration_minutes)}</p>
@@ -292,11 +297,36 @@ export default function Exams({ currentPage, setCurrentPage }) {
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div>
                   <label className="block font-medium mb-1">Subject Name</label>
-                  <input type="text" name="subject" value={exam.subject} onChange={handleChange} required className="w-full border rounded px-3 py-2" />
+                  <input
+                    type="text"
+                    name="subject"
+                    value={exam.subject}
+                    onChange={handleChange}
+                    required
+                    className="w-full border rounded px-3 py-2"
+                  />
+                </div>
+                <div>
+                  <label className="block font-medium mb-1">Description</label>
+                  <textarea
+                    name="description"
+                    value={exam.description || ""}
+                    onChange={handleChange}
+                    required
+                    className="w-full border rounded px-3 py-2"
+                    rows="4"
+                  />
                 </div>
                 <div>
                   <label className="block font-medium mb-1">Duration (minutes)</label>
-                  <input type="number" name="duration" value={exam.duration} onChange={handleChange} required className="w-full border rounded px-3 py-2" />
+                  <input
+                    type="number"
+                    name="duration"
+                    value={exam.duration}
+                    onChange={handleChange}
+                    required
+                    className="w-full border rounded px-3 py-2"
+                  />
                 </div>
                 <div>
                   <label className="block font-medium mb-1">Start Time</label>
@@ -309,14 +339,16 @@ export default function Exams({ currentPage, setCurrentPage }) {
                     className="w-full border rounded px-3 py-2"
                   />
                 </div>
-                <button type="submit" className="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700 transition">
+                <button
+                  type="submit"
+                  className="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700 transition"
+                >
                   Proceed to Add Questions
                 </button>
               </form>
             </div>
           </section>
         )}
-
         {showEditModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
             <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">
@@ -331,6 +363,17 @@ export default function Exams({ currentPage, setCurrentPage }) {
                     onChange={handleEditChange}
                     required
                     className="w-full border rounded px-3 py-2"
+                  />
+                </div>
+                <div>
+                  <label className="block font-medium mb-1">Description</label>
+                  <textarea
+                    name="description"
+                    value={editExam.description || ""}
+                    onChange={handleEditChange}
+                    required
+                    className="w-full border rounded px-3 py-2"
+                    rows="4"
                   />
                 </div>
                 <div>
@@ -374,6 +417,7 @@ export default function Exams({ currentPage, setCurrentPage }) {
             </div>
           </div>
         )}
+
         {showDeleteModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
             <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
