@@ -18,7 +18,7 @@ const app = express();
 // => Middleware for CORS Handling
 app.use(
   cors({
-    origin: process.env.CORS_ORIGIN, //List of allowed origins
+    origin: "*", //List of allowed origins
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   })
@@ -33,8 +33,9 @@ app.use(express.urlencoded({ extended: true }));
 
 // # Import routes
 import routes from "./routes/routes.js";
-app.use(routes);
+import decodeToken from "./middleware/verifytoken.middleware.js";
 
+app.use("/", decodeToken, routes);
 
 // # Miiddleware
 // ! Error handling middleware
