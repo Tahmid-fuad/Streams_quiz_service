@@ -268,18 +268,30 @@ export default function AdminExamDetails() {
                                                 {index + 1}. {question.question_text}
                                             </h3>
                                             <ul className="space-y-2">
-                                                {question.options.map((option, optIndex) => (
-                                                    <li
-                                                        key={optIndex}
-                                                        className={`p-2 rounded ${question.correctOption === String.fromCharCode(65 + optIndex)
-                                                            ? "bg-green-100 text-green-800 font-semibold"
-                                                            : "bg-gray-100"
-                                                            }`}
-                                                    >
-                                                        {String.fromCharCode(65 + optIndex)}. {option}
-                                                    </li>
-                                                ))}
+                                                {question.options.map((option, optIndex) => {
+                                                    const correctIndex = question.options.findIndex(opt => opt === question.correctOption);
+                                                    return (
+                                                        <li
+                                                            key={optIndex}
+                                                            className={`p-2 rounded ${optIndex === correctIndex
+                                                                ? "bg-green-100 text-green-800 font-semibold"
+                                                                : "bg-gray-100"
+                                                                }`}
+                                                        >
+                                                            {String.fromCharCode(65 + optIndex)}. {option}
+                                                        </li>
+                                                    );
+                                                })}
                                             </ul>
+                                            <p className="text-sm mt-2">
+                                                <strong>Correct Answer:</strong>{" "}
+                                                {question.options && question.correctOption
+                                                    ? String.fromCharCode(65 + question.options.findIndex(opt => opt === question.correctOption))
+                                                    : ""}
+                                            </p>
+                                            <div className="text-sm text-gray-600">
+                                                <strong>Score:</strong> {question.score}
+                                            </div>
                                         </div>
                                         <div className="flex flex-col items-end gap-2">
                                             <div className="text-sm text-gray-600">

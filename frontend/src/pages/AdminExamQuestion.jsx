@@ -217,7 +217,13 @@ export default function AdminExamQuestions() {
                                 <li key={i}>{String.fromCharCode(65 + i)}. {opt}</li>
                               ))}
                             </ul>
-                            <p className="text-sm">Correct: {question.correctOption}</p>
+                            <p className="text-sm">
+                              Correct: {
+                                question.options && question.correctOption
+                                  ? String.fromCharCode(65 + question.options.findIndex(opt => opt === question.correctOption))
+                                  : ""
+                              }
+                            </p>
                             <p className="text-sm">Score: {question.score}</p>
                           </div>
                           <div className="flex gap-2">
@@ -273,8 +279,19 @@ export default function AdminExamQuestions() {
                   <label className="block font-medium mb-1">Correct Option</label>
                   <select
                     name="correctOption"
-                    value={form.correctOption}
-                    onChange={(e) => handleQuestionChange(e, formId)}
+                    value={
+                      form.options.findIndex((opt) => opt === form.correctOption) !== -1
+                        ? String.fromCharCode(65 + form.options.findIndex((opt) => opt === form.correctOption))
+                        : ""
+                    }
+                    onChange={(e) => {
+                      const selectedIndex = e.target.value.charCodeAt(0) - 65;
+                      const selectedValue = form.options[selectedIndex];
+                      handleQuestionChange(
+                        { target: { name: "correctOption", value: selectedValue } },
+                        formId
+                      );
+                    }}
                     required
                     className="w-full border rounded px-3 py-2"
                   >
@@ -360,8 +377,18 @@ export default function AdminExamQuestions() {
                       <label className="block font-medium mb-1">Correct Option</label>
                       <select
                         name="correctOption"
-                        value={editQuestion.correctOption}
-                        onChange={(e) => handleEditChange(e)}
+                        value={
+                          editQuestion.options.findIndex((opt) => opt === editQuestion.correctOption) !== -1
+                            ? String.fromCharCode(65 + editQuestion.options.findIndex((opt) => opt === editQuestion.correctOption))
+                            : ""
+                        }
+                        onChange={(e) => {
+                          const selectedIndex = e.target.value.charCodeAt(0) - 65;
+                          const selectedValue = editQuestion.options[selectedIndex];
+                          handleEditChange({
+                            target: { name: "correctOption", value: selectedValue }
+                          });
+                        }}
                         required
                         className="w-full border rounded px-3 py-2"
                       >

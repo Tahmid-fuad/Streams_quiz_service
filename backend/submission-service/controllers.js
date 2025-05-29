@@ -7,21 +7,16 @@ const submitExam = async (req, res) => {
 
   try {
     const { answers, user_id } = req.body;
-
     if (!user_id || !examId || !answers) {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
     // Fetch all questions for this exam from exam-service
     const examServiceUrl = process.env.EXAM_SERVICE_URL 
-    const { status, data: questions, error } = await axios.get(
+    const { data: questions } = await axios.get(
       `${examServiceUrl}/${examId}`
     );
-    console.log(status, questions, error);
-    if (status !== 200) {
-      return res.status(status).json({ message: error });
-    }
-
+    console.log(questions);
 
     if (!questions) {
       return res.status(404).json({ message: "Exam not found" });
@@ -29,7 +24,7 @@ const submitExam = async (req, res) => {
 
     // Map question_id to question details for quick lookup
     const questionMap = {};
-    questions.forEach((q) => {
+    (questions.questionIds || []).forEach((q) => {
       questionMap[q._id] = q;
     });
 
@@ -37,26 +32,22 @@ const submitExam = async (req, res) => {
     let totalScore = 0;
     const enrichedAnswers = answers.map((ans) => {
       const question = questionMap[ans.question_id];
-      // If question.correctOption is an index (number as string), parse it
       let correct_option = null;
+      let question_mark = null;
       if (question) {
-        const correctIndex = isNaN(question.correctOption)
-          ? question.options.indexOf(question.correctOption)
-          : parseInt(question.correctOption, 10);
-        correct_option =
-          question.options[correctIndex] !== undefined
-            ? question.options[correctIndex]
-            : null;
+        correct_option = question.correctOption;
+        question_mark = question.score || 1;
         if (ans.selected_option === correct_option) {
-          totalScore += question.score || 1;
+          totalScore += question_mark;
         }
       }
       return {
         ...ans,
         correct_option,
+        question_mark,
       };
     });
-    const maxScore = questions.reduce((sum, q) => sum + (q.score || 1), 0);
+    const maxScore = (questions.questionIds || []).reduce((sum, q) => sum + (q.score || 1), 0);
 
     const submitted_at = new Date();
 
@@ -69,6 +60,14 @@ const submitExam = async (req, res) => {
     });
 
     await submission.save();
+
+    // Add submission ID to user's submissionIds array
+    await require("./models/user.model").findByIdAndUpdate(
+      user_id,
+      { $push: { submissionIds: submission._id } },
+      { new: true }
+    );
+
     res.status(201).json({ message: "Exam submitted", submission, maxScore });
   } catch (error) {
     res.status(500).json({ message: "Submission failed", error: error.message });

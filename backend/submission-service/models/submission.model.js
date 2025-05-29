@@ -8,6 +8,7 @@ const answerSchema = new mongoose.Schema({
   },
   selected_option: String,
   correct_option: String,
+  question_mark: Number,
 });
 
 const submissionSchema = new mongoose.Schema(
