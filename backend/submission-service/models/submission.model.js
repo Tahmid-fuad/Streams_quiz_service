@@ -8,6 +8,7 @@ const answerSchema = new mongoose.Schema({
   },
   selected_option: String,
   correct_option: String,
+  question_mark: Number,
 });
 
 const submissionSchema = new mongoose.Schema(
@@ -20,6 +21,10 @@ const submissionSchema = new mongoose.Schema(
     exam_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Exam",
+      required: true,
+    },
+    start_time: {
+      type: Date,
       required: true,
     },
     answers: [answerSchema],

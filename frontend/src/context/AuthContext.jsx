@@ -24,6 +24,7 @@ export const AuthProvider = ({ children }) => {
 
       if (roleResponse?.role && roleResponse?.email && profileResponse?.name) {
         setUser({
+          id: profileResponse.id,
           name: profileResponse.name,
           email: roleResponse.email, 
           role: roleResponse.role

@@ -35,6 +35,7 @@ app.use(express.urlencoded({ extended: true }));
 import routes from "./routes/routes.js";
 app.use(routes);
 
+
 // # Miiddleware
 // ! Error handling middleware
 app.use(errorMiddleware);
