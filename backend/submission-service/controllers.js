@@ -1,14 +1,33 @@
 const Submission = require("./models/submission.model");
 const axios = require("axios");
+const jwt = require("jsonwebtoken");
 
 // POST /api/submissions
 const submitExam = async (req, res) => {
   const examId = req.params.examId;
 
   try {
-    const { answers, user_id, start_time } = req.body;
-    if (!user_id || !examId || !answers) {
-      return res.status(400).json({ message: "Missing required fields" });
+    const token = req.headers.authorization.split(" ")[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user_id= decoded.id;
+    const { answers, start_time } = req.body;
+    if (!user_id ) {
+      return res.status(400).json({ message: "User ID is required" });
+    }
+    if (!examId) {
+      return res.status(400).json({ message: "Exam ID is required" });
+    }
+    if (!answers || !Array.isArray(answers) || answers.length === 0) {
+      return res.status(400).json({ message: "Answers are required" });
+    }
+    if (!start_time) {
+      return res.status(400).json({ message: "Start time is required" });
+    }
+    // Validate that all answers have question_id and selected_option
+    for (const ans of answers) {
+      if (!ans.question_id ) {
+        return res.status(400).json({ message: "Each answer must have question_id and selected_option" });
+      }
     }
 
     // Fetch all questions for this exam from exam-service
@@ -61,6 +80,7 @@ const submitExam = async (req, res) => {
     });
 
     await submission.save();
+
 
     // Add submission ID to user's submissionIds array
     await require("./models/user.model").findByIdAndUpdate(
