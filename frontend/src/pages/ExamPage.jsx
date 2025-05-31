@@ -77,12 +77,29 @@ export default function ExamPage() {
     }
     try {
       // Prepare answers in API format
-      const formattedAnswers = Object.entries(answers).map(([questionId, selectedIndex]) => {
-        const question = exam.questionIds.find(q => q._id === questionId);
-        const selectedValue = question ? question.options[selectedIndex] : undefined;
+      // For each question, if not answered, send empty string as selected_option
+      // Each answer must have question_id and selected_option
+      const formattedAnswers = exam.questionIds.map((question) => {
+        // Always include question_id and selected_option
+        let selected_option = "";
+        if (
+          answers.hasOwnProperty(question._id) &&
+          answers[question._id] !== undefined &&
+          answers[question._id] !== null
+        ) {
+          const selectedIndex = answers[question._id];
+          // Defensive: check if selectedIndex is a valid index
+          if (
+            Array.isArray(question.options) &&
+            selectedIndex >= 0 &&
+            selectedIndex < question.options.length
+          ) {
+            selected_option = question.options[selectedIndex];
+          }
+        }
         return {
-          question_id: questionId,
-          selected_option: selectedValue,
+          question_id: question._id,
+          selected_option: selected_option,
         };
       });
       const payload = {
@@ -166,6 +183,7 @@ export default function ExamPage() {
             <div className="space-y-8">
               {exam.questionIds.map((question, idx) => {
                 const answer = submissionResult.submission?.answers?.find(a => a.question_id === question._id);
+                // If user didn't answer, answer.selected_option will be ""
                 const userSelected = answer ? answer.selected_option : null;
                 const correct = answer ? answer.correct_option : null;
                 return (
@@ -208,9 +226,21 @@ export default function ExamPage() {
                           </label>
                         );
                       })}
+                      {/* If user didn't answer, show a message */}
+                      {answer && answer.selected_option === "" && (
+                        <div className="text-red-500 font-semibold mt-2">You didn't answer this question.</div>
+                      )}
                     </div>
                     <div className="mt-2 text-sm">
-                      <span className="px-2 py-1 rounded bg-yellow-100 text-yellow-700 font-medium">Mark: {answer ? answer.question_mark : 0}</span>
+                      <span className="px-2 py-1 rounded bg-yellow-100 text-yellow-700 font-medium">
+                        Mark: {answer ? answer.question_mark : 0}
+                      </span>
+                      {/* If user didn't answer, show a tag */}
+                      {answer && answer.selected_option === "" && (
+                        <span className="ml-3 px-2 py-1 rounded bg-gray-200 text-gray-700 font-medium">
+                          Didn't answer
+                        </span>
+                      )}
                     </div>
                   </motion.div>
                 );
@@ -286,6 +316,10 @@ export default function ExamPage() {
                       <span className="text-gray-800">{opt}</span>
                     </label>
                   ))}
+                  {/* If not answered, show a message */}
+                  {selectedOption === undefined && (
+                    <div className="text-gray-500 italic mt-2">You didn't answer this question.</div>
+                  )}
                 </div>
               </motion.div>
             );
