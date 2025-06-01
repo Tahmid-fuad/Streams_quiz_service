@@ -128,7 +128,7 @@ const createQuestion = async (req, res) => {
     await newQuestion.save();
     await Exam.findByIdAndUpdate(
       examId,
-      { $push: { questionIds: newQuestion._id } },
+      { $push: { questions: newQuestion._id } },
       { new: true }
     );
     res.status(201).json(newQuestion);
@@ -173,7 +173,7 @@ const createMultipleQuestions = async (req, res) => {
       examId,
       {
         $push: {
-          questionIds: { $each: newQuestions.map((q) => q._id) },
+          questions: { $each: newQuestions.map((q) => q._id) },
         },
         $inc: {
           total_score: newQuestionsScore,

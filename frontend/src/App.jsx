@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Home from "./pages/home";
+
 import Login from "./pages/login";
 import Signup from "./pages/signup";
 import Profile from "./pages/profile";
@@ -38,7 +38,10 @@ function App() {
             <Route path="/admin" element={<AdminProfile />} />
             <Route path="/admin/exams" element={<AdminExams />} />
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
-            <Route path="/admin/examquestions" element={<AdminExamQuestions />} />
+            <Route
+              path="/admin/examquestions"
+              element={<AdminExamQuestions />}
+            />
             <Route path="/admin/users" element={<AdminUsers />} />
             <Route path="/admin/exam/:id" element={<AdminExamDetails />} />
           </Route>

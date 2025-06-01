@@ -1,24 +1,19 @@
-import { Navigate, Outlet } from 'react-router-dom';
-import { useContext, useEffect } from 'react';
-import { AuthContext } from '../context/AuthContext';
-import { getRole } from '../services/api/auth';
+import { Navigate, Outlet, useNavigate } from "react-router-dom";
+import { useContext, useEffect } from "react";
+import { AuthContext } from "../context/AuthContext";
 
 export default function ProtectedRoute({ allowedRole }) {
-  const { user, checkToken, logout, loading, isLoggingOut } = useContext(AuthContext);
+  const { user, verifyAuth, logout, loading, isLoggingOut } =
+    useContext(AuthContext);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const validateRole = async () => {
-      if (!user) return; // 🔐 Don't run if user is already null (e.g., after logout)
-
-      try {
-        const response = await getRole();
-        if (response.role !== allowedRole) {
-          logout();
-          window.location.href = '/access-denied';
-        }
-      } catch (error) {
+    const validateRole = () => {
+      console.log(user);
+      if (user.role !== allowedRole) {
         logout();
-        window.location.href = '/access-denied';
+        navigate("/access-denied", { replace: true });
+        return;
       }
     };
 
@@ -27,21 +22,19 @@ export default function ProtectedRoute({ allowedRole }) {
     }
   }, [user, logout, allowedRole, loading]);
 
-
   useEffect(() => {
     const interval = setInterval(async () => {
       if (!user) return; // Don't check if already logged out
 
-      const validUser = await checkToken();
+      const validUser = await verifyAuth(localStorage.getItem("token"));
       if (!validUser && !isLoggingOut) {
         logout();
-        window.location.href = '/access-denied';
+        window.location.href = "/access-denied";
       }
     }, 5 * 60 * 1000);
 
     return () => clearInterval(interval);
-  }, [checkToken, logout, isLoggingOut, user]);
-
+  }, [verifyAuth, logout, isLoggingOut, user]);
 
   if (loading) {
     return (
@@ -55,7 +48,11 @@ export default function ProtectedRoute({ allowedRole }) {
   }
 
   if (!user) {
-    return isLoggingOut ? <Navigate to="/login" replace /> : <Navigate to="/access-denied" replace />;
+    return isLoggingOut ? (
+      <Navigate to="/login" replace />
+    ) : (
+      <Navigate to="/access-denied" replace />
+    );
   }
 
   if (allowedRole && user.role !== allowedRole) {

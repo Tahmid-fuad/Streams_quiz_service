@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useState, useContext } from "react";
-import { login, getRole } from "../services/api/auth";
+import { login } from "../services/api/auth";
 import { AuthContext } from "../context/AuthContext";
 
 export default function Login() {
@@ -38,35 +38,22 @@ export default function Login() {
     }
 
     try {
-      const response = await login({ email, password });
-      if (response.token) {
-        localStorage.setItem("token", response.token);
-        // Fetch role from /role endpoint
-        const roleResponse = await getRole();
-        if (roleResponse.role) {
-          setUser({
-            email: response.user.email,
-            role: roleResponse.role, // Use role from /role endpoint
-            name: response.user.name,
-          });
-          if (roleResponse.role === "student") {
-            navigate("/profile");
-          } else if (roleResponse.role === "admin") {
-            navigate("/admin");
-          } else {
-            setErrorMessage("Invalid role");
-          }
-        } else {
-          setErrorMessage("Failed to fetch user role. Please try again.");
-        }
+      const { token, message, user } = await login({ email, password });
+      if (token) {
+        localStorage.setItem("token", token);
+        setUser(user);
+        navigate("/dashboard");
       } else {
-        setErrorMessage(response.message || "Login failed. Please try again.");
+        setErrorMessage(message || "Login failed. Please try again.");
       }
     } catch (error) {
       const backendMessage = error?.response?.data?.message;
-      setErrorMessage(backendMessage || error.message || "An error occurred. Please try again.");
+      setErrorMessage(
+        backendMessage ||
+          error.message ||
+          "An error occurred. Please try again."
+      );
     }
-
   };
 
   return (
@@ -81,9 +68,12 @@ export default function Login() {
         </h2>
         <form className="space-y-4" onSubmit={handleSubmit}>
           <div>
-            <label className="block text-sm font-medium text-gray-700">Email</label>
+            <label className="block text-sm font-medium text-gray-700">
+              Email
+            </label>
             <input
-              type="email"
+              type="text"
+              name="email"
               className="w-full mt-1 px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -92,15 +82,20 @@ export default function Login() {
             {emailError && <p className="text-red-500 text-sm">{emailError}</p>}
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">Password</label>
+            <label className="block text-sm font-medium text-gray-700">
+              Password
+            </label>
             <input
               type="password"
+              name="password"
               className="w-full mt-1 px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
             />
-            {passwordError && <p className="text-red-500 text-sm">{passwordError}</p>}
+            {passwordError && (
+              <p className="text-red-500 text-sm">{passwordError}</p>
+            )}
           </div>
           {errorMessage && (
             <p className="text-red-500 text-sm text-center">{errorMessage}</p>

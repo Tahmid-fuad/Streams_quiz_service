@@ -5,7 +5,7 @@ const examSchema = new mongoose.Schema(
     title: String,
     description: String,
     duration_minutes: Number,
-    questionIds: [
+    questions: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Question",

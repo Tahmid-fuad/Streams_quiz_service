@@ -1,8 +1,8 @@
-const express = require("express");
+import express from "express";
+import controller from "../controllers/submission.controller.js";
 const router = express.Router();
-const controller = require("../controllers");
-
 
 router.get("/user/:userId", controller.getUserSubmissions);
 
-module.exports = router;
+export default router;
+export { router as adminRoutes };

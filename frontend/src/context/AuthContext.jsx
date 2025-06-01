@@ -1,65 +1,59 @@
 import { createContext, useState, useEffect } from "react";
-import { getRole, getProfile } from "../services/api/auth";
+import { authenticateUser } from "../services/api/auth";
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
-  const checkToken = async () => {
+  useEffect(() => {
     const token = localStorage.getItem("token");
-    if (!token) {
-      setUser(null);
+    if (token) {
+      verifyAuth(token);
+    } else {
       setLoading(false);
-      return false;
+      setUser(null);
+      setIsAuthenticated(false);
     }
+  }, []);
 
+  const verifyAuth = async (token) => {
+    setLoading(true);
     try {
-      const [roleResponse, profileResponse] = await Promise.all([
-        getRole(),
-        getProfile()
-      ]);
-
-      if (roleResponse?.role && roleResponse?.email && profileResponse?.name) {
-        setUser({
-          id: profileResponse.id,
-          name: profileResponse.name,
-          email: roleResponse.email, 
-          role: roleResponse.role
-        });
-        return true;
+      const userData = await authenticateUser(token); // userData: _id, email, role
+      if (userData) {
+        setUser(userData);
+        setIsAuthenticated(true);
+        localStorage.setItem("token", token);
       } else {
-        logout();
-        return false;
+        setUser(null);
+        localStorage.removeItem("token");
       }
     } catch (error) {
-      logout();
-      return false;
+      console.error("Authentication failed:", error);
+      setUser(null);
+      localStorage.removeItem("token");
     } finally {
       setLoading(false);
     }
   };
 
   const logout = () => {
-    return new Promise((resolve) => {
-      setIsLoggingOut(true);
-      localStorage.removeItem("token");
-      setUser(null);
-      setTimeout(() => {
-        setIsLoggingOut(false);
-        resolve(); // Only resolve after setting flag
-      }, 100); // Give a slight delay to ensure ProtectedRoute sees isLoggingOut = true
-    });
+    localStorage.removeItem("token");
+    setUser(null);
+    setIsLoggingOut(true);
+    setTimeout(() => {
+      setIsLoggingOut(false);
+    }, 1000);
   };
 
-  useEffect(() => {
-    checkToken();
-  }, []);
-
   return (
-    <AuthContext.Provider value={{ user, setUser, checkToken, logout, loading, isLoggingOut }}>
+    <AuthContext.Provider
+      value={{ user, setUser, verifyAuth, logout, loading, isLoggingOut }}
+    >
       {children}
     </AuthContext.Provider>
   );

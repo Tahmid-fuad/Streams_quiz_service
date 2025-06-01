@@ -3,11 +3,26 @@
   "version": "1.0.0",
   "description": "Handles exam submissions and results",
   "main": "server.js",
+  "type": "module",
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js"
   },
   "author": "Shahriar Jawwad",
+  "contributors": [
+    {
+      "name": "Shahriar Jawwad",
+      "email": "shahriarjawwad@gmailcom"
+    },
+    {
+      "name": "Ridwan Mahmoud",
+      "email": "asifmahmoud414@gmailcom"
+    },
+    {
+      "name": "Farhan Tanvir",
+      "email": "farhanxtanvir@gmail.com"
+    }
+  ],
   "license": "ISC",
   "dependencies": {
     "axios": "^1.9.0",

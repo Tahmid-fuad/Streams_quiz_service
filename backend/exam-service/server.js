@@ -2,7 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 
-import connectDB from "./config/db.js";
+import connectDB from "./configs/db.js";
 
 // # Import Middleware
 import errorMiddleware from "./middleware/error.middleware.js";
@@ -45,7 +45,7 @@ app.use(errorMiddleware);
 app.use(notFoundMiddleware);
 
 // # Start the server
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3005;
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`Exam Service is running on http://localhost:${PORT}`);
   // # Connect to the database

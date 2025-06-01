@@ -4,7 +4,7 @@ import mongoose from "mongoose";
 const getAllExams = async (req, res) => {
   try {
     const exams = await Exam.find().populate(
-      "questionIds",
+      "questions",
       "-correctOption -examId"
     );
     res.status(200).json(exams);
@@ -17,8 +17,8 @@ const getAllExams = async (req, res) => {
 
 const getAllExamsWithAnswers = async (req, res) => {
   try {
-    // Populate the questionIds field with all fields including correctOption and examId
-    const exams = await Exam.find().populate("questionIds", "-examId");
+    // Populate the questions field with all fields including correctOption and examId
+    const exams = await Exam.find().populate("questions", "-examId");
     res.status(200).json(exams);
   } catch (error) {
     res
@@ -34,7 +34,7 @@ const getExamById = async (req, res) => {
     }
 
     const exam = await Exam.findById(id).populate(
-      "questionIds",
+      "questions",
       "-correctOption -examId"
     );
     if (!exam) {
@@ -54,7 +54,7 @@ const getExamByIdWithAnswers = async (req, res) => {
     if (mongoose.Types.ObjectId.isValid(id) === false) {
       return res.status(400).json({ message: "Invalid Exam ID format" });
     }
-    const exam = await Exam.findById(id).populate("questionIds", "-examId");
+    const exam = await Exam.findById(id).populate("questions", "-examId");
     if (!exam) {
       return res.status(404).json({ message: "Exam not found" });
     }

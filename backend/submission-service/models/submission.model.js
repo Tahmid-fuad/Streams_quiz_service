@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 const answerSchema = new mongoose.Schema({
   question_id: {
@@ -13,12 +13,12 @@ const answerSchema = new mongoose.Schema({
 
 const submissionSchema = new mongoose.Schema(
   {
-    user_id: {
+    userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
-    exam_id: {
+    examId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Exam",
       required: true,
@@ -28,7 +28,7 @@ const submissionSchema = new mongoose.Schema(
       required: true,
     },
     answers: [answerSchema],
-    totalScore: Number,
+    ObtainedScore: Number,
     submitted_at: {
       type: Date,
       default: Date.now,
@@ -41,4 +41,6 @@ const submissionSchema = new mongoose.Schema(
 );
 
 const Submission = mongoose.model("Submission", submissionSchema);
-module.exports = Submission;
+
+export default Submission;
+export { answerSchema, submissionSchema, Submission };

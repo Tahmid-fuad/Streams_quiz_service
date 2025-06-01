@@ -1,4 +1,3 @@
-import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
 
@@ -8,9 +7,7 @@ const register = async (req, res) => {
   try {
     const { name, email, password } = req.body;
     if (!name || !email || !password) {
-      return res
-        .status(400)
-        .json({ message: "Name, email, and password fields are required." });
+      return res.status(400).json({ message: "All fields are required." });
     }
 
     // Check if the email is valid
@@ -34,9 +31,6 @@ const register = async (req, res) => {
       });
     }
 
-    // Hash the password and create a new user
-    const hashedPassword = await bcrypt.hash(password, 10);
-
     // generate OTP
     const otpValue = crypto.randomInt(100000, 999999).toString(); // Generate a 6-digit OTP
 
@@ -44,28 +38,33 @@ const register = async (req, res) => {
     const user = new User({
       name,
       email,
-      password: hashedPassword,
+      password,
       otp: {
         value: otpValue,
         expiresIn: new Date(Date.now() + 15 * 60 * 1000), // 15 minutes expiration
-        verified: false, // Initially not verified
       },
     });
     await user.save();
     res.status(201).json({
       message: "User registered successfully",
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
     });
   } catch (error) {
     res
       .status(400)
-      .json({ message: "Error registering user: " + error.message });
+      .json({ message: "Error registering user!", error: error.message });
   }
 };
 
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
-    // Find user by email
+
     if (!email || !password) {
       return res
         .status(400)
@@ -84,9 +83,9 @@ const login = async (req, res) => {
     }
 
     // Check password
-    const passMatched = await bcrypt.compare(password, user.password);
+    const passMatched = await user.comparePassword(password);
     if (!passMatched) {
-      return res.status(401).json({ message: "Password doesn not match" });
+      return res.status(401).json({ message: "Password does not match" });
     }
 
     // Generate JWT
@@ -94,13 +93,19 @@ const login = async (req, res) => {
       { _id: user._id, email: user.email, role: user.role },
       process.env.JWT_SECRET,
       {
-        expiresIn: "30d",
+        expiresIn: "7d",
       }
     );
 
     res.json({
       message: "Login successful",
       token: token,
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
     });
   } catch (error) {
     res.status(500).json({ message: "Error Loggin in!", error: error.message });

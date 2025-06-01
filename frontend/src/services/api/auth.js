@@ -1,8 +1,11 @@
-import { authAxiosInstance } from '../axiosInstance';
-import { API_ENDPOINTS } from '../constants/apiEndpoints';
+import { authAxiosInstance } from "../axiosInstance";
+import { API_ENDPOINTS } from "../constants/apiEndpoints";
 
 export const login = async (credentials) => {
-  const response = await authAxiosInstance.post(API_ENDPOINTS.LOGIN, credentials);
+  const response = await authAxiosInstance.post(
+    API_ENDPOINTS.LOGIN,
+    credentials
+  );
   return response.data;
 };
 
@@ -11,22 +14,20 @@ export const signup = async (userData) => {
   return response.data;
 };
 
-export const getRole = async () => {
-  const response = await authAxiosInstance.get(API_ENDPOINTS.ROLE);
-  return response.data;
+export const authenticateUser = async (token) => {
+  try {
+    const { data } = await authAxiosInstance.get(API_ENDPOINTS.AUTH, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return data?.user;
+  } catch (error) {
+    console.error("Authentication failed:", error);
+    return null;
+  }
 };
 
 export const getProfile = async () => {
   const response = await authAxiosInstance.get(API_ENDPOINTS.PROFILE);
-  return response.data;
-};
-
-export const changeName = async ({ email, password, newName }) => {
-  const response = await authAxiosInstance.patch(API_ENDPOINTS.CHANGE_NAME, {
-    email,
-    password,
-    newName,
-  });
   return response.data;
 };
 
@@ -39,11 +40,11 @@ export const changeEmail = async ({ email, password, newEmail }) => {
   return response.data;
 };
 
-export const switchUserRole = async ({ email, newRole }) => {
-  const response = await authAxiosInstance.patch(API_ENDPOINTS.SWITCH_ROLE, {
-    email,
-    newRole,
-  });
+export const updateUser = async (data) => {
+  const response = await authAxiosInstance.patch(
+    API_ENDPOINTS.UPDATE_USER,
+    data
+  );
   return response.data;
 };
 
