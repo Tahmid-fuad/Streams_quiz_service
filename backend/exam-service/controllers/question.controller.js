@@ -69,6 +69,21 @@ const getAllQNA = async (req, res) => {
 const getQuestionById = async (req, res) => {
   const { id } = req.params;
   try {
+    const question = await Question.findById(id).select("-correctOption");
+    if (!question) {
+      return res.status(404).json({ message: "Question not found" });
+    }
+    res.status(200).json(question);
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Error fetching question", error: error.message });
+  }
+};
+
+const getQNAById = async (req, res) => {
+  const { id } = req.params;
+  try {
     const question = await Question.findById(id);
     if (!question) {
       return res.status(404).json({ message: "Question not found" });
@@ -149,9 +164,21 @@ const createMultipleQuestions = async (req, res) => {
       return res.status(400).json({ message: "No questions created" });
     }
 
+    const newQuestionsScore = newQuestions.reduce(
+      (total, q) => total + q.score,
+      0
+    );
+
     const exam = await Exam.findByIdAndUpdate(
       examId,
-      { $push: { questionIds: { $each: newQuestions.map((q) => q._id) } } },
+      {
+        $push: {
+          questionIds: { $each: newQuestions.map((q) => q._id) },
+        },
+        $inc: {
+          total_score: newQuestionsScore,
+        },
+      },
       { new: true }
     );
     if (!exam) {
@@ -207,6 +234,7 @@ export {
   getAllQuestions,
   getAllQNA,
   getQuestionById,
+  getQNAById,
   createQuestion,
   createMultipleQuestions,
   updateQuestion,
@@ -216,6 +244,7 @@ export default {
   getAllQuestions,
   getAllQNA,
   getQuestionById,
+  getQNAById,
   createQuestion,
   createMultipleQuestions,
   updateQuestion,

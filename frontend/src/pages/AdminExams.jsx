@@ -1,47 +1,85 @@
-import { useState, useContext } from "react";
+import { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import { createExam } from "../services/api/quiz";
+import { createExam, getAllExams, updateExam, deleteExam } from "../services/api/quiz";
 import { AuthContext } from "../context/AuthContext";
 import Navbar from "../components/NavBar";
 import Footer from "../components/Footer";
 
-const upcomingExams = [
-  { id: 1, subject: "Math", date: "2025-06-10", time: "10:00 AM - 12:00 PM", duration: "2 hours" },
-  { id: 2, subject: "Science", date: "2025-06-12", time: "10:00 AM - 12:00 PM", duration: "2 hours" },
-  { id: 3, subject: "Geography", date: "2025-06-14", time: "11:00 AM - 1:00 PM", duration: "2 hours" },
-  { id: 4, subject: "Computer Science", date: "2025-06-15", time: "9:00 AM - 11:00 AM", duration: "2 hours" },
-  { id: 5, subject: "Economics", date: "2025-06-17", time: "1:00 PM - 3:00 PM", duration: "2 hours" },
-  { id: 6, subject: "Physical Education", date: "2025-06-18", time: "10:30 AM - 12:00 PM", duration: "1.5 hours" },
-];
-
-const ongoingExams = [
-  { id: 7, subject: "History", date: "2025-05-26", time: "9:00 AM - 11:00 AM", duration: "2 hours", status: "Ongoing" },
-  { id: 8, subject: "Biology", date: "2025-05-26", time: "11:00 AM - 1:00 PM", duration: "2 hours", status: "Ongoing" },
-  { id: 9, subject: "Chemistry", date: "2025-05-26", time: "2:00 PM - 4:00 PM", duration: "2 hours", status: "Ongoing" },
-  { id: 10, subject: "Environmental Science", date: "2025-05-26", time: "1:00 PM - 3:00 PM", duration: "2 hours", status: "Ongoing" },
-  { id: 11, subject: "Civics", date: "2025-05-26", time: "3:00 PM - 5:00 PM", duration: "2 hours", status: "Ongoing" },
-  { id: 12, subject: "Language Studies", date: "2025-05-26", time: "4:00 PM - 5:30 PM", duration: "1.5 hours", status: "Ongoing" },
-];
-
-const completedExams = [
-  { id: 13, subject: "English", date: "2025-05-20", time: "10:00 AM - 12:00 PM", duration: "2 hours", score: 88 },
-  { id: 14, subject: "Art", date: "2025-05-22", time: "1:00 PM - 2:30 PM", duration: "1.5 hours", score: 95 },
-  { id: 15, subject: "Physics", date: "2025-05-18", time: "9:00 AM - 11:00 AM", duration: "2 hours", score: 81 },
-  { id: 16, subject: "Sociology", date: "2025-05-19", time: "11:00 AM - 1:00 PM", duration: "2 hours", score: 73 },
-  { id: 17, subject: "Business Studies", date: "2025-05-21", time: "2:00 PM - 4:00 PM", duration: "2 hours", score: 66 },
-  { id: 18, subject: "Music", date: "2025-05-23", time: "9:30 AM - 11:00 AM", duration: "1.5 hours", score: 92 },
-];
-
 export default function Exams({ currentPage, setCurrentPage }) {
   const { user } = useContext(AuthContext);
   const [view, setView] = useState("upcoming");
+  const [exam, setExam] = useState({ subject: "", description: "", duration: "", startTime: "" });
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [exams, setExams] = useState([]);
+  const [editExam, setEditExam] = useState(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [examToDelete, setExamToDelete] = useState(null);
   const navigate = useNavigate();
-  const [exam, setExam] = useState({ subject: "", fullMarks: "", duration: "", startTime: "" });
+
+  useEffect(() => {
+    const fetchExams = async () => {
+      try {
+        const data = await getAllExams();
+        setExams(data);
+      } catch (error) {
+        setErrorMessage("Error fetching exams: " + (error.response?.data?.message || error.message));
+      }
+    };
+    fetchExams();
+  }, []);
+
+  const categorizeExams = () => {
+    const now = new Date();
+    const upcoming = [];
+    const ongoing = [];
+    const completed = [];
+
+    exams.forEach((exam) => {
+      const start = new Date(exam.start_time);
+      const end = new Date(start.getTime() + exam.duration_minutes * 60 * 1000);
+
+      if (now < start) {
+        upcoming.push(exam);
+      } else if (now >= start && now <= end) {
+        ongoing.push(exam);
+      } else if (now > end) {
+        completed.push(exam);
+      }
+    });
+
+    return { upcoming, ongoing, completed };
+  };
+
+  const { upcoming, ongoing, completed } = categorizeExams();
+
+  const formatDate = (isoDate) => {
+    return new Date(isoDate).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "2-digit",
+    });
+  };
+
+  const formatTime = (isoDate, durationMinutes) => {
+    const start = new Date(isoDate);
+    const end = new Date(start.getTime() + durationMinutes * 60 * 1000);
+    return `${start.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })} - ${end.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}`;
+  };
+
+  const formatDuration = (minutes) => {
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    return hours > 0 ? `${hours} hour${hours > 1 ? "s" : ""} ${mins > 0 ? `${mins} min` : ""}` : `${mins} min`;
+  };
 
   const handleChange = (e) => {
     setExam({ ...exam, [e.target.name]: e.target.value });
+  };
+
+  const handleEditChange = (e) => {
+    setEditExam({ ...editExam, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
@@ -53,9 +91,10 @@ export default function Exams({ currentPage, setCurrentPage }) {
     try {
       const examData = {
         title: exam.subject,
-        description: exam.subject,
+        description: exam.description,
         duration_minutes: Number(exam.duration),
         start_time: exam.startTime ? new Date(exam.startTime).toISOString() : undefined,
+        total_score: 0,
       };
       const response = await createExam(examData);
       localStorage.setItem("currentExamId", response._id);
@@ -66,6 +105,43 @@ export default function Exams({ currentPage, setCurrentPage }) {
     } catch (error) {
       setErrorMessage("Error creating exam: " + (error.response?.data?.message || error.message));
     }
+  };
+
+  const handleEditSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const examData = {
+        title: editExam.title,
+        description: editExam.description,
+        duration_minutes: Number(editExam.duration_minutes),
+        start_time: new Date(editExam.start_time).toISOString(),
+      };
+      await updateExam(editExam._id, examData);
+      setExams(exams.map((e) => (e._id === editExam._id ? { ...e, ...examData } : e)));
+      setSuccessMessage("Exam updated successfully!");
+      setShowEditModal(false);
+    } catch (error) {
+      setErrorMessage("Error updating exam: " + (error.response?.data?.message || error.message));
+    }
+  };
+
+  const handleDelete = async (examId) => {
+    setExamToDelete(examId);
+    setShowDeleteModal(true);
+  };
+
+  const openEditModal = (exam) => {
+    const localStartTime = new Date(new Date(exam.start_time).getTime() + 6 * 60 * 60 * 1000)
+      .toISOString()
+      .slice(0, 16);
+    setEditExam({
+      _id: exam._id,
+      title: exam.title,
+      description: exam.description,
+      duration_minutes: exam.duration_minutes,
+      start_time: localStartTime,
+    });
+    setShowEditModal(true);
   };
 
   const sectionTitleStyle = "text-2xl font-bold mb-6 text-indigo-800 flex items-center gap-2";
@@ -91,17 +167,36 @@ export default function Exams({ currentPage, setCurrentPage }) {
           <section className="mb-12">
             <h3 className={sectionTitleStyle}>📅 Upcoming Exams</h3>
             <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-              {upcomingExams.map((exam) => (
-                <div key={exam.id} className={cardStyle}>
-                  <h4 className="text-xl font-bold text-indigo-700 mb-2">{exam.subject}</h4>
+              {upcoming.map((exam) => (
+                <div key={exam._id} className={cardStyle}>
+                  <h4 className="text-xl font-bold text-indigo-700 mb-2">{exam.title}</h4>
+                  <p className="text-gray-600 mb-2 italic">{exam.description}</p>
                   <div className="text-sm text-gray-700 space-y-1 mb-4">
-                    <p><strong>📆 Date:</strong> {exam.date}</p>
-                    <p><strong>🕒 Time:</strong> {exam.time}</p>
-                    <p><strong>⏱️ Duration:</strong> {exam.duration}</p>
+                    <p><strong>📆 Date:</strong> {formatDate(exam.start_time)}</p>
+                    <p><strong>🕒 Time:</strong> {formatTime(exam.start_time, exam.duration_minutes)}</p>
+                    <p><strong>⏱️ Duration:</strong> {formatDuration(exam.duration_minutes)}</p>
+                    <p><strong>📊 Total Marks:</strong> {exam.total_score}</p>
                   </div>
-                  <button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-lg transition font-semibold">
-                    Book a Seat
-                  </button>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => navigate(`/admin/exam/${exam._id}`)}
+                      className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-lg transition font-semibold"
+                    >
+                      View
+                    </button>
+                    <button
+                      onClick={() => openEditModal(exam)}
+                      className="flex-1 bg-yellow-600 hover:bg-yellow-700 text-white py-2 px-4 rounded-lg transition font-semibold"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDelete(exam._id)}
+                      className="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-lg transition font-semibold"
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -112,18 +207,37 @@ export default function Exams({ currentPage, setCurrentPage }) {
           <section className="mb-12">
             <h3 className={sectionTitleStyle}>🟢 Ongoing Exams</h3>
             <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-              {ongoingExams.map((exam) => (
-                <div key={exam.id} className={cardStyle}>
-                  <h4 className="text-xl font-bold text-indigo-700 mb-2">{exam.subject}</h4>
+              {ongoing.map((exam) => (
+                <div key={exam._id} className={cardStyle}>
+                  <h4 className="text-xl font-bold text-indigo-700 mb-2">{exam.title}</h4>
+                  <p className="text-gray-600 mb-2 italic">{exam.description}</p>
                   <div className="text-sm text-gray-700 space-y-1 mb-4">
-                    <p><strong>📆 Date:</strong> {exam.date}</p>
-                    <p><strong>🕒 Time:</strong> {exam.time}</p>
-                    <p><strong>⏱️ Duration:</strong> {exam.duration}</p>
+                    <p><strong>📆 Date:</strong> {formatDate(exam.start_time)}</p>
+                    <p><strong>🕒 Time:</strong> {formatTime(exam.start_time, exam.duration_minutes)}</p>
+                    <p><strong>⏱️ Duration:</strong> {formatDuration(exam.duration_minutes)}</p>
+                    <p><strong>📊 Total Marks:</strong> {exam.total_score}</p>
                     <p className="text-green-600 font-medium">🟢 Live Now</p>
                   </div>
-                  <button className="w-full bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg transition font-semibold">
-                    Start Exam
-                  </button>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => navigate(`/admin/exam/${exam._id}`)}
+                      className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-lg transition font-semibold"
+                    >
+                      View
+                    </button>
+                    <button
+                      onClick={() => openEditModal(exam)}
+                      className="flex-1 bg-yellow-600 hover:bg-yellow-700 text-white py-2 px-4 rounded-lg transition font-semibold"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDelete(exam._id)}
+                      className="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-lg transition font-semibold"
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -134,22 +248,35 @@ export default function Exams({ currentPage, setCurrentPage }) {
           <section className="mb-12">
             <h3 className={sectionTitleStyle}>✅ Completed Exams</h3>
             <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-              {completedExams.map((exam) => (
-                <div key={exam.id} className={cardStyle}>
-                  <h4 className="text-xl font-bold text-indigo-700 mb-2">{exam.subject}</h4>
-                  <div className="text-sm text-gray-700 space-y-1">
-                    <p><strong>📆 Date:</strong> {exam.date}</p>
-                    <p><strong>🕒 Time:</strong> {exam.time}</p>
-                    <p><strong>⏱️ Duration:</strong> {exam.duration}</p>
-                    <p className="flex items-center gap-2">
-                      <strong>🏁 Score:</strong>
-                      <span className={`inline-block text-sm font-bold px-3 py-1 rounded-full ${exam.score >= 90 ? "bg-green-100 text-green-800" : exam.score >= 70 ? "bg-yellow-100 text-yellow-800" : "bg-red-100 text-red-800"}`}>
-                        {exam.score}%
-                      </span>
-                    </p>
-                    <div className="w-full bg-gray-200 rounded-full h-2.5 mt-2">
-                      <div className={`h-2.5 rounded-full ${exam.score >= 90 ? "bg-green-500" : exam.score >= 70 ? "bg-yellow-500" : "bg-red-500"}`} style={{ width: `${exam.score}%` }}></div>
-                    </div>
+              {completed.map((exam) => (
+                <div key={exam._id} className={cardStyle}>
+                  <h4 className="text-xl font-bold text-indigo-700 mb-2">{exam.title}</h4>
+                  <p className="text-gray-600 mb-2 italic">{exam.description}</p>
+                  <div className="text-sm text-gray-700 space-y-1 mb-4">
+                    <p><strong>📆 Date:</strong> {formatDate(exam.start_time)}</p>
+                    <p><strong>🕒 Time:</strong> {formatTime(exam.start_time, exam.duration_minutes)}</p>
+                    <p><strong>⏱️ Duration:</strong> {formatDuration(exam.duration_minutes)}</p>
+                    <p><strong>📊 Total Marks:</strong> {exam.total_score}</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => navigate(`/admin/exam/${exam._id}`)}
+                      className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-lg transition font-semibold"
+                    >
+                      View
+                    </button>
+                    <button
+                      onClick={() => openEditModal(exam)}
+                      className="flex-1 bg-yellow-600 hover:bg-yellow-700 text-white py-2 px-4 rounded-lg transition font-semibold"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDelete(exam._id)}
+                      className="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-lg transition font-semibold"
+                    >
+                      Delete
+                    </button>
                   </div>
                 </div>
               ))}
@@ -161,24 +288,45 @@ export default function Exams({ currentPage, setCurrentPage }) {
           <section className="mb-12 max-w-xl mx-auto">
             <div className="bg-white p-8 rounded-lg shadow">
               <h2 className="text-2xl font-bold mb-6 text-indigo-700 border-b pb-2">🗂️ Create New Exam</h2>
-              {successMessage && (
+              {view !== "setup" && successMessage && (
                 <p className="text-green-500 text-sm text-center mb-4">{successMessage}</p>
               )}
-              {errorMessage && (
+              {view !== "setup" && errorMessage && (
                 <p className="text-red-500 text-sm text-center mb-4">{errorMessage}</p>
               )}
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div>
                   <label className="block font-medium mb-1">Subject Name</label>
-                  <input type="text" name="subject" value={exam.subject} onChange={handleChange} required className="w-full border rounded px-3 py-2" />
+                  <input
+                    type="text"
+                    name="subject"
+                    value={exam.subject}
+                    onChange={handleChange}
+                    required
+                    className="w-full border rounded px-3 py-2"
+                  />
                 </div>
                 <div>
-                  <label className="block font-medium mb-1">Full Marks</label>
-                  <input type="number" name="fullMarks" value={exam.fullMarks} onChange={handleChange} required className="w-full border rounded px-3 py-2" />
+                  <label className="block font-medium mb-1">Description</label>
+                  <textarea
+                    name="description"
+                    value={exam.description || ""}
+                    onChange={handleChange}
+                    required
+                    className="w-full border rounded px-3 py-2"
+                    rows="4"
+                  />
                 </div>
                 <div>
                   <label className="block font-medium mb-1">Duration (minutes)</label>
-                  <input type="number" name="duration" value={exam.duration} onChange={handleChange} required className="w-full border rounded px-3 py-2" />
+                  <input
+                    type="number"
+                    name="duration"
+                    value={exam.duration}
+                    onChange={handleChange}
+                    required
+                    className="w-full border rounded px-3 py-2"
+                  />
                 </div>
                 <div>
                   <label className="block font-medium mb-1">Start Time</label>
@@ -191,12 +339,119 @@ export default function Exams({ currentPage, setCurrentPage }) {
                     className="w-full border rounded px-3 py-2"
                   />
                 </div>
-                <button type="submit" className="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700 transition">
+                <button
+                  type="submit"
+                  className="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700 transition"
+                >
                   Proceed to Add Questions
                 </button>
               </form>
             </div>
           </section>
+        )}
+        {showEditModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+            <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">
+              <h2 className="text-2xl font-bold mb-6 text-indigo-700">Edit Exam</h2>
+              <form onSubmit={handleEditSubmit} className="space-y-5">
+                <div>
+                  <label className="block font-medium mb-1">Subject Name</label>
+                  <input
+                    type="text"
+                    name="title"
+                    value={editExam.title}
+                    onChange={handleEditChange}
+                    required
+                    className="w-full border rounded px-3 py-2"
+                  />
+                </div>
+                <div>
+                  <label className="block font-medium mb-1">Description</label>
+                  <textarea
+                    name="description"
+                    value={editExam.description || ""}
+                    onChange={handleEditChange}
+                    required
+                    className="w-full border rounded px-3 py-2"
+                    rows="4"
+                  />
+                </div>
+                <div>
+                  <label className="block font-medium mb-1">Duration (minutes)</label>
+                  <input
+                    type="number"
+                    name="duration_minutes"
+                    value={editExam.duration_minutes}
+                    onChange={handleEditChange}
+                    required
+                    className="w-full border rounded px-3 py-2"
+                  />
+                </div>
+                <div>
+                  <label className="block font-medium mb-1">Start Time</label>
+                  <input
+                    type="datetime-local"
+                    name="start_time"
+                    value={editExam.start_time}
+                    onChange={handleEditChange}
+                    required
+                    className="w-full border rounded px-3 py-2"
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    type="submit"
+                    className="flex-1 bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700 transition"
+                  >
+                    Save Changes
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowEditModal(false)}
+                    className="flex-1 bg-gray-600 text-white py-2 rounded hover:bg-gray-700 transition"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {showDeleteModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+            <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
+              <h2 className="text-xl font-bold mb-4 text-indigo-700">Are you sure?</h2>
+              <p className="text-gray-600 mb-6">Do you want to delete this exam? This action cannot be undone.</p>
+              <div className="flex gap-2">
+                <button
+                  onClick={async () => {
+                    try {
+                      await deleteExam(examToDelete);
+                      setExams(exams.filter((e) => e._id !== examToDelete));
+                      setSuccessMessage("Exam deleted successfully!");
+                    } catch (error) {
+                      setErrorMessage("Error deleting exam: " + (error.response?.data?.message || error.message));
+                    }
+                    setShowDeleteModal(false);
+                    setExamToDelete(null);
+                  }}
+                  className="flex-1 bg-red-600 text-white py-2 rounded hover:bg-red-700 transition"
+                >
+                  Delete
+                </button>
+                <button
+                  onClick={() => {
+                    setShowDeleteModal(false);
+                    setExamToDelete(null);
+                  }}
+                  className="flex-1 bg-gray-600 text-white py-2 rounded hover:bg-gray-700 transition"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
         )}
       </main>
       <Footer />

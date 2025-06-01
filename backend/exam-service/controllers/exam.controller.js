@@ -3,7 +3,10 @@ import mongoose from "mongoose";
 // Get all Exams
 const getAllExams = async (req, res) => {
   try {
-    const exams = await Exam.find().populate("questionIds", "-correctOption");
+    const exams = await Exam.find().populate(
+      "questionIds",
+      "-correctOption -examId"
+    );
     res.status(200).json(exams);
   } catch (error) {
     res
@@ -11,13 +14,29 @@ const getAllExams = async (req, res) => {
       .json({ message: "Error fetching exams: ", error: error.message });
   }
 };
-const getExamById = (req, res) => {
-  const { id } = req.params;
+
+const getAllExamsWithAnswers = async (req, res) => {
   try {
+    // Populate the questionIds field with all fields including correctOption and examId
+    const exams = await Exam.find().populate("questionIds", "-examId");
+    res.status(200).json(exams);
+  } catch (error) {
+    res
+      .status(404)
+      .json({ message: "Error fetching exams: ", error: error.message });
+  }
+};
+const getExamById = async (req, res) => {
+  try {
+    const { id } = req.params;
     if (mongoose.Types.ObjectId.isValid(id) === false) {
       return res.status(400).json({ message: "Invalid Exam ID format" });
     }
-    const exam = Exam.findById(id).populate("questionIds");
+
+    const exam = await Exam.findById(id).populate(
+      "questionIds",
+      "-correctOption -examId"
+    );
     if (!exam) {
       return res.status(404).json({ message: "Exam not found" });
     }
@@ -29,13 +48,13 @@ const getExamById = (req, res) => {
   }
 };
 
-const getExamByIdWithQuestions = (req, res) => {
-  const { id } = req.params;
+const getExamByIdWithAnswers = async (req, res) => {
   try {
+    const { id } = req.params;
     if (mongoose.Types.ObjectId.isValid(id) === false) {
       return res.status(400).json({ message: "Invalid Exam ID format" });
     }
-    const exam = Exam.findById(id).populate("questionIds");
+    const exam = await Exam.findById(id).populate("questionIds", "-examId");
     if (!exam) {
       return res.status(404).json({ message: "Exam not found" });
     }
@@ -47,72 +66,66 @@ const getExamByIdWithQuestions = (req, res) => {
   }
 };
 
-const createExam = (req, res) => {
-  const { title, description, duration_minutes, start_time } = req.body;
-
-  if (!title || !description || !duration_minutes || !start_time) {
-    return res.status(400).json({ message: "All fields are required" });
+const createExam = async (req, res) => {
+  try {
+    const { title, description, duration_minutes, start_time } = req.body;
+    const newExam = new Exam({
+      title,
+      description,
+      duration_minutes,
+      start_time,
+    });
+    await newExam.save();
+    res.status(201).json(newExam);
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Error creating exam", error: error.message });
   }
-
-  const newExam = new Exam({
-    title,
-    description,
-    duration_minutes,
-    start_time: new Date(start_time), // Ensure start_time is a Date object
-  });
-
-  newExam
-    .save()
-    .then((exam) => {
-      res.status(201).json(exam);
-    })
-    .catch((error) => {
-      res
-        .status(500)
-        .json({ message: "Error creating exam", error: error.message });
-    });
 };
-const updateExam = (req, res) => {
-  const { id } = req.params;
-  const { title, description, duration_minutes } = req.body;
-
-  Exam.findByIdAndUpdate(
-    id,
-    { title, description, duration_minutes },
-    { new: true }
-  )
-    .then((exam) => {
-      if (!exam) {
-        return res.status(404).json({ message: "Exam not found" });
-      }
-      res.status(200).json(exam);
-    })
-    .catch((error) => {
-      res
-        .status(500)
-        .json({ message: "Error updating exam", error: error.message });
-    });
+const updateExam = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { title, description, duration_minutes, start_time } = req.body;
+    const exam = await Exam.findByIdAndUpdate(
+      id,
+      { title, description, duration_minutes, start_time },
+      { new: true }
+    );
+    if (!exam) {
+      return res.status(404).json({ message: "Exam not found" });
+    }
+    res.status(200).json(exam);
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Error updating exam", error: error.message });
+  }
 };
-const deleteExam = (req, res) => {
-  const { id } = req.params;
+const deleteExam = async (req, res) => {
+  try {
+    const { id } = req.params;
 
-  Exam.findByIdAndDelete(id)
-    .then((exam) => {
-      if (!exam) {
-        return res.status(404).json({ message: "Exam not found" });
-      }
-      res.status(200).json({ message: "Exam deleted successfully" });
-    })
-    .catch((error) => {
-      res
-        .status(500)
-        .json({ message: "Error deleting exam", error: error.message });
-    });
+    if (mongoose.Types.ObjectId.isValid(id) === false) {
+      return res.status(400).json({ message: "Invalid Exam ID format" });
+    }
+    const exam = await Exam.findByIdAndDelete(id);
+    if (!exam) {
+      return res.status(404).json({ message: "Exam not found" });
+    }
+    res.status(200).json({ message: "Exam deleted successfully" });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Error deleting exam", error: error.message });
+  }
 };
 
 export default {
   getAllExams,
   getExamById,
+  getAllExamsWithAnswers,
+  getExamByIdWithAnswers,
   createExam,
   updateExam,
   deleteExam,

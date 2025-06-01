@@ -3,14 +3,14 @@ import User from "../models/user.model.js";
 import jwt from "jsonwebtoken";
 
 export const isAuthenticated = async (req, res, next) => {
-  if (
-    req.headers.authorization &&
-    req.headers.authorization.startsWith("Bearer")
-  ) {
+  if (req.user) {
     try {
-      const token = req.headers.authorization.split(" ")[1];
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      req.user = await User.findById(decoded._id).select("-password");
+      const user = await User.findById(req.user._id).select("-password");
+      if (!user) {
+        return res
+          .status(404)
+          .json({ message: "Unauthorized Access Request, User not found" });
+      }
       next();
     } catch (error) {
       res
@@ -25,7 +25,7 @@ export const isAuthenticated = async (req, res, next) => {
 };
 
 export const isAdmin = (req, res, next) => {
-  if (req.admin && req.admin.role === "admin") {
+  if (req.user && req.user.role === "admin") {
     next();
   } else {
     res
